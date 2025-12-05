@@ -1,0 +1,79 @@
+[2025-12-06 00:59:36] INFO     [bybit_ai_trader.setup_logger:81] ============================================================
+[2025-12-06 00:59:36] INFO     [bybit_ai_trader.setup_logger:82] Logging initialized: bybit_ai_trader @ INFO
+[2025-12-06 00:59:36] INFO     [bybit_ai_trader.setup_logger:83] Log file: logs\trading_bot_20251206.log
+[2025-12-06 00:59:36] INFO     [bybit_ai_trader.setup_logger:84] ============================================================
+[2025-12-06 00:59:36] INFO     [bybit_ai_trader.utils.notifications.__init__:58] NotificationManager initialized: Telegram=disabled, Email=disabled
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.setup_logger:81] ============================================================
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.setup_logger:82] Logging initialized: bybit_ai_trader @ INFO
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.setup_logger:83] Log file: logs\trading_bot_20251206.log
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.setup_logger:84] ============================================================
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.utils.notifications.__init__:58] NotificationManager initialized: Telegram=disabled, Email=disabled
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader._initialize_components:86] Initializing bot components...
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.paper_trader.__init__:77] PaperTrader initialized: Balance=$1000.00, Fee=0.060%, Slippage=0.050%
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.client.__init__:49] BybitClient initialized (testnet)
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.data_fetcher.__init__:51] DataFetcher initialized: BTCUSDT @ 240min interval
+[2025-12-06 01:00:22] INFO     [bybit_ai_trader.risk_manager.__init__:71] RiskManager initialized with risk controls
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.strategies.ml_strategy._load_model:61] Model loaded from models\xgb_btcusdt_h4.pkl
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.strategies.ml_strategy._load_metadata:76] Metadata loaded from models\xgb_btcusdt_h4_features.json
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.strategies.ml_strategy.__init__:51] MLStrategy initialized: model=xgb_btcusdt_h4.pkl, features=0, threshold=0.55
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader._initialize_components:141] All components initialized successfully
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:77] ============================================================
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:78] Trading Bot Initialized
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:79] Mode: PAPER TRADING
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:80] Symbol: BTCUSDT
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:81] Interval: 240 minutes
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.__init__:82] ============================================================
+[2025-12-06 01:00:28] INFO     [bybit_ai_trader.run:333] Starting bot main loop...
+[2025-12-06 01:00:29] INFO     [bybit_ai_trader.data_fetcher.fetch_latest_data:71] Fetched 200 candles for BTCUSDT
+[2025-12-06 01:00:29] INFO     [bybit_ai_trader.data_fetcher.get_latest_features:165] Latest features calculated: 27 features
+[2025-12-06 01:00:29] ERROR    [bybit_ai_trader.run:379] Error in main loop: feature_names mismatch: ['log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'momentum_3h', 'momentum_12h'] ['open', 'high', 'low', 'close', 'volume', 'log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'close_position', 'volume_ma_24h', 'volume_ratio', 'momentum_3h', 'momentum_12h']
+training data did not have the following fields: high, close, volume_ma_24h, volume_ratio, volume, low, close_position, open
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 358, in run
+    signal = self.strategy.generate_signal(features, current_position_side)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\strategies\ml_strategy.py", line 156, in generate_signal
+    prediction, confidence = self.predict(features)
+                             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\strategies\ml_strategy.py", line 127, in predict
+    prediction = self.model.predict(X)[0]
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\sklearn.py", line 1842, in predict
+    class_probs = super().predict(
+                  ^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\sklearn.py", line 1446, in predict
+    predts = self.get_booster().inplace_predict(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 2854, in inplace_predict
+    self._validate_features(fns)
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 3431, in _validate_features
+    raise ValueError(msg.format(self.feature_names, feature_names))
+ValueError: feature_names mismatch: ['log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'momentum_3h', 'momentum_12h'] ['open', 'high', 'low', 'close', 'volume', 'log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'close_position', 'volume_ma_24h', 'volume_ratio', 'momentum_3h', 'momentum_12h']
+training data did not have the following fields: high, close, volume_ma_24h, volume_ratio, volume, low, close_position, open
+[2025-12-06 01:00:53] INFO     [bybit_ai_trader.main.signal_handler:33] Shutdown signal received, stopping bot...
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:391] Shutting down bot...
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:397] ============================================================
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:398] FINAL PERFORMANCE STATS
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:399] ============================================================
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:401] error: No trades yet
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:402] ============================================================
+[2025-12-06 01:01:29] INFO     [bybit_ai_trader._shutdown:409] Bot stopped
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.setup_logger:81] ============================================================
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.setup_logger:82] Logging initialized: bybit_ai_trader @ INFO
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.setup_logger:83] Log file: logs\trading_bot_20251206.log
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.setup_logger:84] ============================================================
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.utils.notifications.__init__:58] NotificationManager initialized: Telegram=disabled, Email=disabled
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader._initialize_components:86] Initializing bot components...
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.paper_trader.__init__:77] PaperTrader initialized: Balance=$1000.00, Fee=0.060%, Slippage=0.050%
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.client.__init__:49] BybitClient initialized (testnet)
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.data_fetcher.__init__:51] DataFetcher initialized: BTCUSDT @ 240min interval
+[2025-12-06 01:02:22] INFO     [bybit_ai_trader.risk_manager.__init__:71] RiskManager initialized with risk controls
