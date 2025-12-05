@@ -462,3 +462,495 @@ AttributeError: 'dict' object has no attribute 'columns'
 [02:01:28] INFO     BybitClient initialized (testnet)
 [02:01:28] INFO     DataFetcher initialized: BTCUSDT @ 240min interval
 [02:01:28] INFO     RiskManager initialized with risk controls
+[02:01:29] INFO     Model loaded from models\ensemble_btcusdt_h4_enhanced.pkl
+[02:01:29] INFO     Metadata loaded from models\ensemble_btcusdt_h4_enhanced_metadata.json
+[02:01:29] INFO     MLStrategy initialized: model=ensemble_btcusdt_h4_enhanced.pkl, features=60, threshold=0.45
+[02:01:29] INFO     All components initialized successfully
+[02:01:29] INFO     ============================================================
+[02:01:29] INFO     Trading Bot Initialized
+[02:01:29] INFO     Mode: PAPER TRADING
+[02:01:29] INFO     Symbol: BTCUSDT
+[02:01:29] INFO     Interval: 240 minutes
+[02:01:29] INFO     ============================================================
+[02:01:29] INFO     Starting bot main loop...
+[02:01:30] INFO     Fetched 600 candles for BTCUSDT
+[02:01:30] INFO     Latest features calculated: 77 features
+[02:01:32] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:01:32] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:01:32] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:01:32] INFO     Fetched 600 candles for BTCUSDT
+[02:01:32] INFO     Latest features calculated: 77 features
+[02:01:32] INFO     Dynamic SL/TP for Buy: SL=$382286.02 (3.00%), TP=$417755.86 (6.00%)
+[02:01:32] ERROR    Invalid order parameters: Invalid quantity: 0.0
+[02:01:32] INFO     ============================================================
+[02:01:32] INFO     BOT STATUS
+[02:01:32] INFO     ============================================================
+[02:01:32] INFO     Balance: $1000.00
+[02:01:32] INFO     Equity: $1000.00
+[02:01:32] INFO     Total PnL: $+0.00
+[02:01:32] INFO     Position: None
+[02:01:32] INFO     Daily Trades: 0/10
+[02:01:32] INFO     Daily PnL: $+0.00
+[02:01:32] INFO     ============================================================
+[02:01:32] INFO     Waiting 300s until next check...
+[02:01:47] INFO     Fetched 600 candles for BTCUSDT
+[02:01:47] INFO     Latest features calculated: 77 features
+[02:01:47] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:01:47] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:01:47] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:01:48] INFO     Fetched 600 candles for BTCUSDT
+[02:01:48] INFO     Latest features calculated: 77 features
+[02:01:48] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:01:56] INFO     Fetched 200 candles for BTCUSDT
+[02:01:56] ERROR    No features calculated
+[02:01:56] WARNING  Failed to get features, waiting for next cycle
+[02:02:49] INFO     Fetched 600 candles for BTCUSDT
+[02:02:49] INFO     Latest features calculated: 77 features
+[02:02:49] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:02:49] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:02:49] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:02:50] INFO     Fetched 600 candles for BTCUSDT
+[02:02:50] INFO     Latest features calculated: 77 features
+[02:02:50] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:03:51] INFO     Fetched 600 candles for BTCUSDT
+[02:03:51] INFO     Latest features calculated: 77 features
+[02:03:51] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:03:51] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:03:51] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:03:52] INFO     Fetched 600 candles for BTCUSDT
+[02:03:52] INFO     Latest features calculated: 77 features
+[02:03:52] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:04:53] INFO     Fetched 600 candles for BTCUSDT
+[02:04:53] INFO     Latest features calculated: 77 features
+[02:04:53] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:04:53] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:04:53] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:04:54] INFO     Fetched 600 candles for BTCUSDT
+[02:04:54] INFO     Latest features calculated: 77 features
+[02:04:54] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:05:55] INFO     Fetched 600 candles for BTCUSDT
+[02:05:55] INFO     Latest features calculated: 77 features
+[02:05:55] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:05:55] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:05:55] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:05:56] INFO     Fetched 600 candles for BTCUSDT
+[02:05:56] INFO     Latest features calculated: 77 features
+[02:05:56] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:06:10] INFO     Fetched 200 candles for BTCUSDT
+[02:06:10] INFO     Latest features calculated: 19 features
+[02:06:10] WARNING  Missing features: {'atr_pct', 'macd', 'bb_upper', 'ma_20_1d', 'ma_20_1h', 'cci', 'bb_middle', 'sar_trend', 'obv_trend', 'hist_volatility', 'atr', 'is_doji', 'macd_cross', 'obv_ma', 'roc_10', 'momentum_10', 'williams_r', 'bb_std', 'adx', 'macd_hist', 'vpt', 'ma_20_4h', 'body_size', 'rsi_1h', 'upper_shadow', 'atr_percentile', 'volatility_regime', 'rsi_1d', 'roc_20', 'price_vs_vwap', 'strong_trend', 'vwap', 'sar', 'rsi_4h', 'trend_alignment', 'level_touches', 'obv', 'bb_position', 'bb_width', 'price_level', 'momentum_20'}
+[02:06:10] INFO     Signal: HOLD | Prediction: DOWN @ 0.894 | Price: $394109.30
+[02:06:10] INFO     ============================================================
+[02:06:10] INFO     BOT STATUS
+[02:06:10] INFO     ============================================================
+[02:06:10] INFO     Balance: $1000.00
+[02:06:10] INFO     Equity: $1000.00
+[02:06:10] INFO     Total PnL: $+0.00
+[02:06:10] INFO     Position: None
+[02:06:10] INFO     Daily Trades: 0/10
+[02:06:10] INFO     Daily PnL: $+0.00
+[02:06:10] INFO     ============================================================
+[02:06:10] INFO     Waiting 300s until next check...
+[02:06:33] INFO     Fetched 600 candles for BTCUSDT
+[02:06:33] INFO     Latest features calculated: 77 features
+[02:06:33] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:06:33] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:06:33] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:06:34] INFO     Fetched 600 candles for BTCUSDT
+[02:06:34] INFO     Latest features calculated: 77 features
+[02:06:34] INFO     Dynamic SL/TP for Buy: SL=$382286.02 (3.00%), TP=$417755.86 (6.00%)
+[02:06:34] ERROR    Invalid order parameters: Invalid quantity: 0.0
+[02:06:34] INFO     ============================================================
+[02:06:34] INFO     BOT STATUS
+[02:06:34] INFO     ============================================================
+[02:06:34] INFO     Balance: $1000.00
+[02:06:34] INFO     Equity: $1000.00
+[02:06:34] INFO     Total PnL: $+0.00
+[02:06:34] INFO     Position: None
+[02:06:34] INFO     Daily Trades: 0/10
+[02:06:34] INFO     Daily PnL: $+0.00
+[02:06:34] INFO     ============================================================
+[02:06:34] INFO     Waiting 300s until next check...
+[02:06:57] INFO     Fetched 200 candles for BTCUSDT
+[02:06:57] ERROR    No features calculated
+[02:06:57] WARNING  Failed to get features, waiting for next cycle
+[02:06:57] INFO     Fetched 600 candles for BTCUSDT
+[02:06:57] INFO     Latest features calculated: 77 features
+[02:06:57] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:06:57] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:06:57] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:06:58] INFO     Fetched 600 candles for BTCUSDT
+[02:06:58] INFO     Latest features calculated: 77 features
+[02:06:58] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:06:58] INFO     Shutdown signal received, stopping bot...
+[02:07:50] INFO     Shutdown signal received, stopping bot...
+[02:07:59] INFO     Fetched 600 candles for BTCUSDT
+[02:07:59] INFO     Latest features calculated: 77 features
+[02:07:59] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:07:59] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:07:59] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:08:00] INFO     Fetched 600 candles for BTCUSDT
+[02:08:00] INFO     Latest features calculated: 77 features
+[02:08:00] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:09:01] INFO     Fetched 600 candles for BTCUSDT
+[02:09:01] INFO     Latest features calculated: 77 features
+[02:09:01] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:09:01] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:09:01] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:09:02] INFO     Fetched 600 candles for BTCUSDT
+[02:09:02] INFO     Latest features calculated: 77 features
+[02:09:02] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:10:03] INFO     Fetched 600 candles for BTCUSDT
+[02:10:03] INFO     Latest features calculated: 77 features
+[02:10:03] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:10:03] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:10:03] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:10:03] INFO     Fetched 600 candles for BTCUSDT
+[02:10:03] INFO     Latest features calculated: 77 features
+[02:10:03] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:10:42] INFO     Shutdown signal received, stopping bot...
+[02:10:43] INFO     Shutdown signal received, stopping bot...
+[02:10:43] INFO     Shutdown signal received, stopping bot...
+[02:10:43] INFO     Shutdown signal received, stopping bot...
+[02:10:43] INFO     Shutdown signal received, stopping bot...
+[02:11:05] INFO     Fetched 600 candles for BTCUSDT
+[02:11:05] INFO     Latest features calculated: 77 features
+[02:11:05] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:11:05] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:11:05] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:11:05] INFO     Fetched 600 candles for BTCUSDT
+[02:11:05] INFO     Latest features calculated: 77 features
+[02:11:05] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:11:12] INFO     Fetched 200 candles for BTCUSDT
+[02:11:12] INFO     Latest features calculated: 19 features
+[02:11:12] WARNING  Missing features: {'atr_pct', 'macd', 'bb_upper', 'ma_20_1d', 'ma_20_1h', 'cci', 'bb_middle', 'sar_trend', 'obv_trend', 'hist_volatility', 'atr', 'is_doji', 'macd_cross', 'obv_ma', 'roc_10', 'momentum_10', 'williams_r', 'bb_std', 'adx', 'macd_hist', 'vpt', 'ma_20_4h', 'body_size', 'rsi_1h', 'upper_shadow', 'atr_percentile', 'volatility_regime', 'rsi_1d', 'roc_20', 'price_vs_vwap', 'strong_trend', 'vwap', 'sar', 'rsi_4h', 'trend_alignment', 'level_touches', 'obv', 'bb_position', 'bb_width', 'price_level', 'momentum_20'}
+[02:11:12] INFO     Signal: HOLD | Prediction: DOWN @ 0.894 | Price: $394109.30
+[02:11:12] INFO     ============================================================
+[02:11:12] INFO     BOT STATUS
+[02:11:12] INFO     ============================================================
+[02:11:12] INFO     Balance: $1000.00
+[02:11:12] INFO     Equity: $1000.00
+[02:11:12] INFO     Total PnL: $+0.00
+[02:11:12] INFO     Position: None
+[02:11:12] INFO     Daily Trades: 0/10
+[02:11:12] INFO     Daily PnL: $+0.00
+[02:11:12] INFO     ============================================================
+[02:11:12] INFO     Waiting 300s until next check...
+[02:11:34] INFO     Shutting down bot...
+[02:11:34] INFO     ============================================================
+[02:11:34] INFO     FINAL PERFORMANCE STATS
+[02:11:34] INFO     ============================================================
+[02:11:34] INFO     error: No trades yet
+[02:11:34] INFO     ============================================================
+[02:11:34] INFO     Bot stopped
+[02:11:58] INFO     Fetched 200 candles for BTCUSDT
+[02:11:58] ERROR    No features calculated
+[02:11:58] WARNING  Failed to get features, waiting for next cycle
+[02:12:07] INFO     Fetched 600 candles for BTCUSDT
+[02:12:07] INFO     Latest features calculated: 77 features
+[02:12:07] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:12:07] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:12:07] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:12:07] INFO     Fetched 600 candles for BTCUSDT
+[02:12:07] INFO     Latest features calculated: 77 features
+[02:12:07] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:13:09] INFO     Fetched 600 candles for BTCUSDT
+[02:13:09] INFO     Latest features calculated: 77 features
+[02:13:09] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:13:09] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:13:09] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:13:09] INFO     Fetched 600 candles for BTCUSDT
+[02:13:09] INFO     Latest features calculated: 77 features
+[02:13:09] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:14:10] INFO     Fetched 600 candles for BTCUSDT
+[02:14:10] INFO     Latest features calculated: 77 features
+[02:14:10] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:14:10] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:14:10] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:14:11] INFO     Fetched 600 candles for BTCUSDT
+[02:14:11] INFO     Latest features calculated: 77 features
+[02:14:11] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:15:12] INFO     Fetched 600 candles for BTCUSDT
+[02:15:13] INFO     Latest features calculated: 77 features
+[02:15:13] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:15:13] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:15:13] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:15:13] INFO     Fetched 600 candles for BTCUSDT
+[02:15:13] INFO     Latest features calculated: 77 features
+[02:15:13] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:16:13] INFO     Fetched 200 candles for BTCUSDT
+[02:16:13] INFO     Latest features calculated: 19 features
+[02:16:13] WARNING  Missing features: {'atr_pct', 'macd', 'bb_upper', 'ma_20_1d', 'ma_20_1h', 'cci', 'bb_middle', 'sar_trend', 'obv_trend', 'hist_volatility', 'atr', 'is_doji', 'macd_cross', 'obv_ma', 'roc_10', 'momentum_10', 'williams_r', 'bb_std', 'adx', 'macd_hist', 'vpt', 'ma_20_4h', 'body_size', 'rsi_1h', 'upper_shadow', 'atr_percentile', 'volatility_regime', 'rsi_1d', 'roc_20', 'price_vs_vwap', 'strong_trend', 'vwap', 'sar', 'rsi_4h', 'trend_alignment', 'level_touches', 'obv', 'bb_position', 'bb_width', 'price_level', 'momentum_20'}
+[02:16:13] INFO     Signal: HOLD | Prediction: DOWN @ 0.894 | Price: $394109.30
+[02:16:13] INFO     ============================================================
+[02:16:13] INFO     BOT STATUS
+[02:16:13] INFO     ============================================================
+[02:16:13] INFO     Balance: $1000.00
+[02:16:13] INFO     Equity: $1000.00
+[02:16:13] INFO     Total PnL: $+0.00
+[02:16:13] INFO     Position: None
+[02:16:13] INFO     Daily Trades: 0/10
+[02:16:13] INFO     Daily PnL: $+0.00
+[02:16:13] INFO     ============================================================
+[02:16:13] INFO     Waiting 300s until next check...
+[02:16:14] INFO     Fetched 600 candles for BTCUSDT
+[02:16:14] INFO     Latest features calculated: 77 features
+[02:16:14] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:16:14] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:16:14] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:16:15] INFO     Fetched 600 candles for BTCUSDT
+[02:16:15] INFO     Latest features calculated: 77 features
+[02:16:15] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:17:00] INFO     Fetched 200 candles for BTCUSDT
+[02:17:00] ERROR    No features calculated
+[02:17:00] WARNING  Failed to get features, waiting for next cycle
+[02:17:16] INFO     Fetched 600 candles for BTCUSDT
+[02:17:16] INFO     Latest features calculated: 77 features
+[02:17:16] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:17:16] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:17:16] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:17:17] INFO     Fetched 600 candles for BTCUSDT
+[02:17:17] INFO     Latest features calculated: 77 features
+[02:17:17] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:18:18] INFO     Fetched 600 candles for BTCUSDT
+[02:18:18] INFO     Latest features calculated: 77 features
+[02:18:18] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:18:18] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:18:18] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:18:19] INFO     Fetched 600 candles for BTCUSDT
+[02:18:19] INFO     Latest features calculated: 77 features
+[02:18:19] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:19:20] INFO     Fetched 600 candles for BTCUSDT
+[02:19:20] INFO     Latest features calculated: 77 features
+[02:19:20] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:19:20] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:19:20] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:19:21] INFO     Fetched 600 candles for BTCUSDT
+[02:19:21] INFO     Latest features calculated: 77 features
+[02:19:21] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:20:23] INFO     Fetched 600 candles for BTCUSDT
+[02:20:23] INFO     Latest features calculated: 77 features
+[02:20:23] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:20:23] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:20:23] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:20:23] INFO     Fetched 600 candles for BTCUSDT
+[02:20:23] INFO     Latest features calculated: 77 features
+[02:20:23] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:21:14] INFO     Fetched 200 candles for BTCUSDT
+[02:21:14] INFO     Latest features calculated: 19 features
+[02:21:14] WARNING  Missing features: {'atr_pct', 'macd', 'bb_upper', 'ma_20_1d', 'ma_20_1h', 'cci', 'bb_middle', 'sar_trend', 'obv_trend', 'hist_volatility', 'atr', 'is_doji', 'macd_cross', 'obv_ma', 'roc_10', 'momentum_10', 'williams_r', 'bb_std', 'adx', 'macd_hist', 'vpt', 'ma_20_4h', 'body_size', 'rsi_1h', 'upper_shadow', 'atr_percentile', 'volatility_regime', 'rsi_1d', 'roc_20', 'price_vs_vwap', 'strong_trend', 'vwap', 'sar', 'rsi_4h', 'trend_alignment', 'level_touches', 'obv', 'bb_position', 'bb_width', 'price_level', 'momentum_20'}
+[02:21:14] INFO     Signal: HOLD | Prediction: DOWN @ 0.894 | Price: $394109.30
+[02:21:14] INFO     ============================================================
+[02:21:14] INFO     BOT STATUS
+[02:21:14] INFO     ============================================================
+[02:21:14] INFO     Balance: $1000.00
+[02:21:14] INFO     Equity: $1000.00
+[02:21:14] INFO     Total PnL: $+0.00
+[02:21:14] INFO     Position: None
+[02:21:14] INFO     Daily Trades: 0/10
+[02:21:14] INFO     Daily PnL: $+0.00
+[02:21:14] INFO     ============================================================
+[02:21:14] INFO     Waiting 300s until next check...
+[02:21:25] INFO     Fetched 600 candles for BTCUSDT
+[02:21:25] INFO     Latest features calculated: 77 features
+[02:21:25] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:21:25] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:21:25] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:21:25] INFO     Fetched 600 candles for BTCUSDT
+[02:21:25] INFO     Latest features calculated: 77 features
+[02:21:25] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:22:01] INFO     Fetched 200 candles for BTCUSDT
+[02:22:01] ERROR    No features calculated
+[02:22:01] WARNING  Failed to get features, waiting for next cycle
+[02:22:27] INFO     Fetched 600 candles for BTCUSDT
+[02:22:27] INFO     Latest features calculated: 77 features
+[02:22:27] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:22:27] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:22:27] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:22:27] INFO     Fetched 600 candles for BTCUSDT
+[02:22:27] INFO     Latest features calculated: 77 features
+[02:22:27] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
+[02:23:29] INFO     Fetched 600 candles for BTCUSDT
+[02:23:29] INFO     Latest features calculated: 77 features
+[02:23:29] INFO     SIGNAL: ENTER Buy | Prediction: UP @ 0.603 | Reason: Enter long position (confidence: 0.603)
+[02:23:29] INFO     Signal: ENTER | Prediction: UP @ 0.603 | Price: $394109.30
+[02:23:29] INFO     Position size calculated: $350.00 = 0.0000 @ $394109.30 (Risk: $10.00, Confidence: 0.60, Multiplier: 0.70)
+[02:23:29] INFO     Fetched 600 candles for BTCUSDT
+[02:23:30] INFO     Latest features calculated: 77 features
+[02:23:30] ERROR    Error in main loop: 'dict' object has no attribute 'columns'
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 384, in run
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 184, in _execute_trade
+    self._open_position(signal, current_price)
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 214, in _open_position
+    atr_pct = features.get('atr_pct', None)
+                    ^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'columns'
