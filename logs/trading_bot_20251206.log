@@ -77,3 +77,29 @@ training data did not have the following fields: high, close, volume_ma_24h, vol
 [2025-12-06 01:02:22] INFO     [bybit_ai_trader.client.__init__:49] BybitClient initialized (testnet)
 [2025-12-06 01:02:22] INFO     [bybit_ai_trader.data_fetcher.__init__:51] DataFetcher initialized: BTCUSDT @ 240min interval
 [2025-12-06 01:02:22] INFO     [bybit_ai_trader.risk_manager.__init__:71] RiskManager initialized with risk controls
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.strategies.ml_strategy._load_model:61] Model loaded from models\xgb_btcusdt_h4.pkl
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.strategies.ml_strategy._load_metadata:76] Metadata loaded from models\xgb_btcusdt_h4_features.json
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.strategies.ml_strategy.__init__:51] MLStrategy initialized: model=xgb_btcusdt_h4.pkl, features=0, threshold=0.55
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader._initialize_components:141] All components initialized successfully
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:77] ============================================================
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:78] Trading Bot Initialized
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:79] Mode: PAPER TRADING
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:80] Symbol: BTCUSDT
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:81] Interval: 240 minutes
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.__init__:82] ============================================================
+[2025-12-06 01:02:23] INFO     [bybit_ai_trader.run:333] Starting bot main loop...
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader.data_fetcher.fetch_latest_data:71] Fetched 200 candles for BTCUSDT
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader.data_fetcher.get_latest_features:172] Latest features calculated: 19 features
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader.run:360] Signal: HOLD | Prediction: UP @ 0.521 | Price: $397473.00
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:299] ============================================================
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:300] BOT STATUS
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:301] ============================================================
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:306] Balance: $1000.00
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:307] Equity: $1000.00
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:308] Total PnL: $+0.00
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:320] Position: None
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:324] Daily Trades: 0/10
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:325] Daily PnL: $+0.00
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader._print_status:327] ============================================================
+[2025-12-06 01:02:24] INFO     [bybit_ai_trader.run:373] Waiting 300s until next check...
+[2025-12-06 01:02:48] INFO     [bybit_ai_trader.main.signal_handler:33] Shutdown signal received, stopping bot...
