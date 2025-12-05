@@ -32,14 +32,14 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 # Our modules
-from models.ml_dataset import build_ml_dataset, create_time_splits
+from models.ml_dataset import build_ml_dataset
 from backtest.backtester import backtest_signals, compare_strategies
 from backtest.strategies import ma_trend_strategy
 
 
 def load_trained_model(model_path: Path) -> dict:
     """
-    Load trained XGBoost model and metadata.
+    Load trained ensemble model and metadata.
     
     Args:
         model_path: Path to the saved model pickle file
@@ -50,16 +50,39 @@ def load_trained_model(model_path: Path) -> dict:
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
     
+    # Load model
     with open(model_path, 'rb') as f:
-        model_data = pickle.load(f)
+        model = pickle.load(f)
     
-    print(f"📦 Loaded model from {model_path.name}")
-    print(f"   Training date: {model_data['training_info']['training_date']}")
-    print(f"   Horizon: {model_data['training_info']['horizon_hours']} hours")
-    print(f"   Features: {len(model_data['feature_columns'])}")
-    print(f"   Train ROC AUC: {model_data['evaluation_metrics']['roc_auc']:.4f}")
-    
-    return model_data
+    # Load metadata
+    metadata_path = model_path.with_name(model_path.stem + '_metadata.json')
+    if metadata_path.exists():
+        import json
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+        
+        print(f"📦 Loaded optimized ensemble model from {model_path.name}")
+        print(f"   Training date: {metadata.get('training_date', 'N/A')}")
+        print(f"   Features: {metadata.get('n_features', 'N/A')}")
+        print(f"   Final ROC AUC: {metadata.get('final_roc_auc', 'N/A'):.4f}")
+        
+        return {
+            'model': model,
+            'feature_columns': metadata.get('features', []),
+            'training_info': metadata,
+            'evaluation_metrics': {'roc_auc': metadata.get('final_roc_auc', 0)}
+        }
+    else:
+        # Fallback for old format
+        print(f"📦 Loaded model from {model_path.name}")
+        print(f"   Warning: Metadata file not found")
+        
+        return {
+            'model': model,
+            'feature_columns': [],
+            'training_info': {'training_date': 'Unknown'},
+            'evaluation_metrics': {'roc_auc': 0}
+        }
 
 
 def generate_ml_signals(df: pd.DataFrame, 
@@ -294,8 +317,8 @@ def main():
     print("=" * 50)
     
     # Define paths
-    features_path = script_dir.parent / "data" / "processed" / "btcusdt_1h_features.parquet"
-    model_path = script_dir.parent / "models" / "xgb_h4.pkl"
+    features_path = script_dir.parent / "data" / "processed" / "btcusdt_1h_full_history_enhanced.parquet"
+    model_path = script_dir.parent / "models" / "ensemble_btcusdt_h4_optuna_optimized.pkl"
     outputs_dir = script_dir.parent / "outputs"
     
     # Ensure output directory exists
@@ -337,10 +360,19 @@ def main():
         
         # Extract test period data
         test_indices = range(test_start, n_samples)
-        df_test = df.iloc[test_indices].copy().reset_index(drop=True)
+        df_test = df.iloc[test_indices].copy().reset_index()
+        
+        # Ensure timestamp column exists
+        if 'timestamp' not in df_test.columns:
+            if df_test.index.name == 'timestamp' or isinstance(df_test.index, pd.DatetimeIndex):
+                df_test['timestamp'] = df_test.index
+            else:
+                # Generate sequential timestamps if not available
+                df_test['timestamp'] = pd.date_range(start='2020-01-01', periods=len(df_test), freq='1H')
         
         print(f"   Test period: {len(df_test):,} samples")
-        print(f"   Date range: {df_test['timestamp'].min()} to {df_test['timestamp'].max()}")
+        if 'timestamp' in df_test.columns:
+            print(f"   Date range: {df_test['timestamp'].min()} to {df_test['timestamp'].max()}")
         
         # Generate ML signals for test period
         print(f"\n🔮 Generating ML trading signals...")

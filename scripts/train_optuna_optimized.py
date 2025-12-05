@@ -1,6 +1,7 @@
 """
-Hyperparameter optimization using Optuna for XGBoost and LightGBM.
+Hyperparameter optimization using Optuna for XGBoost, LightGBM, and CatBoost.
 Automatically finds the best hyperparameters to maximize ROC AUC.
+Creates 3-model ensemble for maximum prediction accuracy.
 """
 
 import numpy as np
@@ -16,6 +17,7 @@ warnings.filterwarnings('ignore')
 # ML libraries
 import xgboost as xgb
 import lightgbm as lgb
+import catboost as cb
 import optuna
 from optuna.samplers import TPESampler
 from sklearn.metrics import roc_auc_score
@@ -179,6 +181,70 @@ def optimize_lightgbm(X_train, y_train, X_val, y_val, n_trials: int = 100) -> Di
     return study.best_params
 
 
+def objective_catboost(trial: optuna.Trial, X_train, y_train, X_val, y_val) -> float:
+    """Optuna objective function for CatBoost hyperparameter optimization."""
+    
+    # Calculate class weight
+    neg_count = (y_train == 0).sum()
+    pos_count = (y_train == 1).sum()
+    scale_pos_weight = neg_count / pos_count if pos_count > 0 else 1
+    
+    # Suggest hyperparameters
+    params = {
+        'loss_function': 'Logloss',
+        'random_seed': 42,
+        'verbose': False,
+        'scale_pos_weight': scale_pos_weight,
+        
+        # Optuna-optimized parameters
+        'depth': trial.suggest_int('depth', 3, 10),
+        'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.1, log=True),
+        'iterations': trial.suggest_int('iterations', 100, 1000, step=100),
+        'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 1.0, 10.0),
+        'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
+        'random_strength': trial.suggest_float('random_strength', 0.0, 10.0),
+        'border_count': trial.suggest_int('border_count', 32, 255),
+    }
+    
+    # Train model
+    model = cb.CatBoostClassifier(**params, early_stopping_rounds=50)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_val, y_val)],
+        verbose=False
+    )
+    
+    # Evaluate
+    y_proba = model.predict_proba(X_val)[:, 1]
+    roc_auc = roc_auc_score(y_val, y_proba)
+    
+    return roc_auc
+
+
+def optimize_catboost(X_train, y_train, X_val, y_val, n_trials: int = 100) -> Dict[str, Any]:
+    """Optimize CatBoost hyperparameters using Optuna."""
+    print("\n🔍 Optimizing CatBoost hyperparameters...")
+    print(f"   Running {n_trials} trials...")
+    
+    study = optuna.create_study(
+        direction='maximize',
+        sampler=TPESampler(seed=42),
+        study_name='catboost_optimization'
+    )
+    
+    study.optimize(
+        lambda trial: objective_catboost(trial, X_train, y_train, X_val, y_val),
+        n_trials=n_trials,
+        show_progress_bar=True
+    )
+    
+    print(f"\n✅ CatBoost Optimization Complete!")
+    print(f"   Best ROC AUC: {study.best_value:.4f}")
+    print(f"   Best params: {study.best_params}")
+    
+    return study.best_params
+
+
 def train_final_model_xgb(X_train, y_train, X_val, y_val, best_params: Dict) -> xgb.XGBClassifier:
     """Train final XGBoost model with best hyperparameters."""
     print("\n🚀 Training final XGBoost model with optimized hyperparameters...")
@@ -239,20 +305,52 @@ def train_final_model_lgb(X_train, y_train, X_val, y_val, best_params: Dict) -> 
     return model
 
 
-def create_ensemble(xgb_model, lgb_model) -> VotingClassifier:
-    """Create ensemble of already-trained models."""
-    print("\n🎯 Creating optimized ensemble model...")
+def train_final_model_cat(X_train, y_train, X_val, y_val, best_params: Dict) -> cb.CatBoostClassifier:
+    """Train final CatBoost model with best hyperparameters."""
+    print("\n🚀 Training final CatBoost model with optimized hyperparameters...")
+    
+    # Calculate class weight
+    neg_count = (y_train == 0).sum()
+    pos_count = (y_train == 1).sum()
+    scale_pos_weight = neg_count / pos_count if pos_count > 0 else 1
+    
+    params = {
+        **best_params,
+        'loss_function': 'Logloss',
+        'random_seed': 42,
+        'verbose': False,
+        'scale_pos_weight': scale_pos_weight
+    }
+    
+    model = cb.CatBoostClassifier(**params, early_stopping_rounds=50)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_val, y_val)],
+        verbose=False
+    )
+    
+    # Evaluate
+    y_proba = model.predict_proba(X_val)[:, 1]
+    roc_auc = roc_auc_score(y_val, y_proba)
+    print(f"   Final CatBoost ROC AUC: {roc_auc:.4f}")
+    
+    return model
+
+
+def create_ensemble(xgb_model, lgb_model, cat_model) -> VotingClassifier:
+    """Create ensemble of already-trained models (XGBoost + LightGBM + CatBoost)."""
+    print("\n🎯 Creating 3-model optimized ensemble...")
     
     from sklearn.preprocessing import LabelEncoder
     
     ensemble = VotingClassifier(
-        estimators=[('xgb', xgb_model), ('lgb', lgb_model)],
+        estimators=[('xgb', xgb_model), ('lgb', lgb_model), ('cat', cat_model)],
         voting='soft'
     )
     
     # Set fitted=True to skip refitting
-    ensemble.estimators_ = [xgb_model, lgb_model]
-    ensemble.named_estimators_ = {'xgb': xgb_model, 'lgb': lgb_model}
+    ensemble.estimators_ = [xgb_model, lgb_model, cat_model]
+    ensemble.named_estimators_ = {'xgb': xgb_model, 'lgb': lgb_model, 'cat': cat_model}
     ensemble.classes_ = np.array([0, 1])
     
     # Create proper label encoder
@@ -264,9 +362,10 @@ def create_ensemble(xgb_model, lgb_model) -> VotingClassifier:
 
 
 def main():
-    """Main training pipeline with Optuna optimization."""
+    """Main training pipeline with Optuna optimization for 3-model ensemble."""
     print("=" * 70)
     print("🎯 HYPERPARAMETER OPTIMIZATION WITH OPTUNA")
+    print("   XGBoost + LightGBM + CatBoost Ensemble")
     print("=" * 70)
     
     # Load data
@@ -324,9 +423,10 @@ def main():
     else:
         X_train_balanced, y_train_balanced = X_train, y_train
     
-    # Optimize both models
+    # Optimize all three models
     xgb_best_params = optimize_xgboost(X_train_balanced, y_train_balanced, X_val, y_val, n_trials=100)
     lgb_best_params = optimize_lightgbm(X_train_balanced, y_train_balanced, X_val, y_val, n_trials=100)
+    cat_best_params = optimize_catboost(X_train_balanced, y_train_balanced, X_val, y_val, n_trials=100)
     
     # Train final models with best hyperparameters on ALL data
     print("\n" + "=" * 70)
@@ -353,9 +453,10 @@ def main():
     # Train final models
     xgb_model = train_final_model_xgb(X_train_final_balanced, y_train_final_balanced, X_val_final, y_val_final, xgb_best_params)
     lgb_model = train_final_model_lgb(X_train_final_balanced, y_train_final_balanced, X_val_final, y_val_final, lgb_best_params)
+    cat_model = train_final_model_cat(X_train_final_balanced, y_train_final_balanced, X_val_final, y_val_final, cat_best_params)
     
-    # Create ensemble
-    ensemble = create_ensemble(xgb_model, lgb_model)
+    # Create 3-model ensemble
+    ensemble = create_ensemble(xgb_model, lgb_model, cat_model)
     
     # Evaluate ensemble
     y_proba_ensemble = ensemble.predict_proba(X_val_final)[:, 1]
@@ -374,13 +475,15 @@ def main():
     
     # Save metadata
     metadata = {
-        "model_type": "ensemble_optuna_optimized",
+        "model_type": "ensemble_3model_optuna_optimized",
+        "models": ["XGBoost", "LightGBM", "CatBoost"],
         "features": feature_cols,
         "n_features": len(feature_cols),
         "training_date": datetime.now().isoformat(),
-        "optimization_trials": 100,
+        "optimization_trials": 300,  # 100 each
         "xgb_best_params": xgb_best_params,
         "lgb_best_params": lgb_best_params,
+        "cat_best_params": cat_best_params,
         "final_roc_auc": float(ensemble_roc_auc),
         "data_samples": len(ml_df),
         "class_distribution": {
@@ -401,7 +504,8 @@ def main():
     print(f"\n📊 RESULTS SUMMARY:")
     print(f"   XGBoost Best Params: {xgb_best_params}")
     print(f"   LightGBM Best Params: {lgb_best_params}")
-    print(f"   Final Ensemble ROC AUC: {ensemble_roc_auc:.4f}")
+    print(f"   CatBoost Best Params: {cat_best_params}")
+    print(f"   Final 3-Model Ensemble ROC AUC: {ensemble_roc_auc:.4f}")
     print(f"\n💡 To use this model, update your .env file:")
     print(f"   MODEL_PATH=models/ensemble_btcusdt_h4_optuna_optimized.pkl")
     print(f"   MODEL_FEATURES_PATH=models/ensemble_btcusdt_h4_optuna_optimized_metadata.json")
