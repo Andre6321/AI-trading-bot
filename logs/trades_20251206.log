@@ -1,0 +1,105 @@
+[00:59:36] INFO     ============================================================
+[00:59:36] INFO     Logging initialized: bybit_ai_trader @ INFO
+[00:59:36] INFO     Log file: logs\trading_bot_20251206.log
+[00:59:36] INFO     ============================================================
+[00:59:36] INFO     NotificationManager initialized: Telegram=disabled, Email=disabled
+[01:00:22] INFO     ============================================================
+[01:00:22] INFO     Logging initialized: bybit_ai_trader @ INFO
+[01:00:22] INFO     Log file: logs\trading_bot_20251206.log
+[01:00:22] INFO     ============================================================
+[01:00:22] INFO     NotificationManager initialized: Telegram=disabled, Email=disabled
+[01:00:22] INFO     Initializing bot components...
+[01:00:22] INFO     PaperTrader initialized: Balance=$1000.00, Fee=0.060%, Slippage=0.050%
+[01:00:22] INFO     BybitClient initialized (testnet)
+[01:00:22] INFO     DataFetcher initialized: BTCUSDT @ 240min interval
+[01:00:22] INFO     RiskManager initialized with risk controls
+[01:00:28] INFO     Model loaded from models\xgb_btcusdt_h4.pkl
+[01:00:28] INFO     Metadata loaded from models\xgb_btcusdt_h4_features.json
+[01:00:28] INFO     MLStrategy initialized: model=xgb_btcusdt_h4.pkl, features=0, threshold=0.55
+[01:00:28] INFO     All components initialized successfully
+[01:00:28] INFO     ============================================================
+[01:00:28] INFO     Trading Bot Initialized
+[01:00:28] INFO     Mode: PAPER TRADING
+[01:00:28] INFO     Symbol: BTCUSDT
+[01:00:28] INFO     Interval: 240 minutes
+[01:00:28] INFO     ============================================================
+[01:00:28] INFO     Starting bot main loop...
+[01:00:29] INFO     Fetched 200 candles for BTCUSDT
+[01:00:29] INFO     Latest features calculated: 27 features
+[01:00:29] ERROR    Error in main loop: feature_names mismatch: ['log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'momentum_3h', 'momentum_12h'] ['open', 'high', 'low', 'close', 'volume', 'log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'close_position', 'volume_ma_24h', 'volume_ratio', 'momentum_3h', 'momentum_12h']
+training data did not have the following fields: high, close, volume_ma_24h, volume_ratio, volume, low, close_position, open
+Traceback (most recent call last):
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\main.py", line 358, in run
+    signal = self.strategy.generate_signal(features, current_position_side)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\strategies\ml_strategy.py", line 156, in generate_signal
+    prediction, confidence = self.predict(features)
+                             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\bybit_ai_trader\src\bybit_ai_trader\strategies\ml_strategy.py", line 127, in predict
+    prediction = self.model.predict(X)[0]
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\sklearn.py", line 1842, in predict
+    class_probs = super().predict(
+                  ^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\sklearn.py", line 1446, in predict
+    predts = self.get_booster().inplace_predict(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 774, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 2854, in inplace_predict
+    self._validate_features(fns)
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python312\Lib\site-packages\xgboost\core.py", line 3431, in _validate_features
+    raise ValueError(msg.format(self.feature_names, feature_names))
+ValueError: feature_names mismatch: ['log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'momentum_3h', 'momentum_12h'] ['open', 'high', 'low', 'close', 'volume', 'log_ret_1h', 'log_ret_4h', 'log_ret_24h', 'ma_10', 'ma_20', 'ma_50', 'ma_100', 'rsi_14', 'atr_14', 'vol_24h', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'price_vs_ma_20', 'price_vs_ma_50', 'hl_spread_pct', 'close_position', 'volume_ma_24h', 'volume_ratio', 'momentum_3h', 'momentum_12h']
+training data did not have the following fields: high, close, volume_ma_24h, volume_ratio, volume, low, close_position, open
+[01:00:53] INFO     Shutdown signal received, stopping bot...
+[01:01:29] INFO     Shutting down bot...
+[01:01:29] INFO     ============================================================
+[01:01:29] INFO     FINAL PERFORMANCE STATS
+[01:01:29] INFO     ============================================================
+[01:01:29] INFO     error: No trades yet
+[01:01:29] INFO     ============================================================
+[01:01:29] INFO     Bot stopped
+[01:02:22] INFO     ============================================================
+[01:02:22] INFO     Logging initialized: bybit_ai_trader @ INFO
+[01:02:22] INFO     Log file: logs\trading_bot_20251206.log
+[01:02:22] INFO     ============================================================
+[01:02:22] INFO     NotificationManager initialized: Telegram=disabled, Email=disabled
+[01:02:22] INFO     Initializing bot components...
+[01:02:22] INFO     PaperTrader initialized: Balance=$1000.00, Fee=0.060%, Slippage=0.050%
+[01:02:22] INFO     BybitClient initialized (testnet)
+[01:02:22] INFO     DataFetcher initialized: BTCUSDT @ 240min interval
+[01:02:22] INFO     RiskManager initialized with risk controls
+[01:02:23] INFO     Model loaded from models\xgb_btcusdt_h4.pkl
+[01:02:23] INFO     Metadata loaded from models\xgb_btcusdt_h4_features.json
+[01:02:23] INFO     MLStrategy initialized: model=xgb_btcusdt_h4.pkl, features=0, threshold=0.55
+[01:02:23] INFO     All components initialized successfully
+[01:02:23] INFO     ============================================================
+[01:02:23] INFO     Trading Bot Initialized
+[01:02:23] INFO     Mode: PAPER TRADING
+[01:02:23] INFO     Symbol: BTCUSDT
+[01:02:23] INFO     Interval: 240 minutes
+[01:02:23] INFO     ============================================================
+[01:02:23] INFO     Starting bot main loop...
+[01:02:24] INFO     Fetched 200 candles for BTCUSDT
+[01:02:24] INFO     Latest features calculated: 19 features
+[01:02:24] INFO     Signal: HOLD | Prediction: UP @ 0.521 | Price: $397473.00
+[01:02:24] INFO     ============================================================
+[01:02:24] INFO     BOT STATUS
+[01:02:24] INFO     ============================================================
+[01:02:24] INFO     Balance: $1000.00
+[01:02:24] INFO     Equity: $1000.00
+[01:02:24] INFO     Total PnL: $+0.00
+[01:02:24] INFO     Position: None
+[01:02:24] INFO     Daily Trades: 0/10
+[01:02:24] INFO     Daily PnL: $+0.00
+[01:02:24] INFO     ============================================================
+[01:02:24] INFO     Waiting 300s until next check...
+[01:02:48] INFO     Shutdown signal received, stopping bot...
