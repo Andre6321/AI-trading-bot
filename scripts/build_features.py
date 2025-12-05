@@ -1,55 +1,76 @@
 """
-Example usage of the feature builder module.
+Feature building pipeline script.
 
-This script demonstrates how to load raw Bybit data and transform it into ML features.
+This script:
+1. Downloads Bybit BTCUSDT 1h data with funding rates
+2. Builds comprehensive features from the raw data
+3. Saves processed features for ML model training
+
+Output files:
+- data/raw/bybit_btcusdt_1h_with_funding.parquet
+- data/processed/btcusdt_1h_features.parquet
+
+Usage: python scripts/build_features.py
 """
 import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from pathlib import Path
 
-import pandas as pd
-from src.features.feature_builder import build_features, get_feature_groups
+# Add src to path for imports
+script_dir = Path(__file__).parent
+src_dir = script_dir.parent / "src"
+sys.path.insert(0, str(src_dir))
+
+from bybit_ai_trader.research.data_download import download_bybit_btcusdt_1h
+from bybit_ai_trader.research.features import build_and_save_features
 
 
 def main():
-    # Example of how to use the feature builder
-    data_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw', 'bybit_btcusdt_perp_1h_with_sentiment.parquet')
+    """Main feature building pipeline."""
+    print("🚀 Feature Building Pipeline")
+    print("=" * 50)
     
-    if not os.path.exists(data_path):
-        print(f"Data file not found: {data_path}")
-        print("Please run src/data/download_bybit_data.py first to download the data.")
-        return
-    
-    print("Loading raw data...")
-    raw_data = pd.read_parquet(data_path)
-    print(f"Loaded {len(raw_data)} rows of raw data")
-    print("Columns:", raw_data.columns.tolist())
-    
-    print("\nBuilding features...")
-    features_df = build_features(raw_data)
-    
-    print(f"\nFeatures built successfully!")
-    print(f"Shape: {features_df.shape}")
-    
-    # Show feature groups
-    groups = get_feature_groups()
-    print(f"\nFeature groups:")
-    for group_name, features in groups.items():
-        available_features = [f for f in features if f in features_df.columns]
-        print(f"  {group_name}: {len(available_features)} features")
-    
-    # Save features to processed data folder
-    output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'processed')
-    os.makedirs(output_dir, exist_ok=True)
-    
-    output_path = os.path.join(output_dir, 'btcusdt_features_1h.parquet')
-    features_df.to_parquet(output_path, engine='pyarrow', index=False)
-    print(f"\nSaved features to: {output_path}")
-    
-    # Basic statistics
-    print(f"\nBasic statistics:")
-    print(features_df[['returns_1h', 'rsi_14', 'volatility_24h', 'funding_z_score']].describe())
+    try:
+        # Step 1: Download raw data with funding rates
+        print("📥 Step 1: Downloading Bybit BTCUSDT data...")
+        ohlcv_path, funding_path = download_bybit_btcusdt_1h(
+            years=3,
+            include_funding=True
+        )
+        
+        if funding_path is None:
+            print("⚠️  Warning: No funding data available, using OHLCV only")
+            input_path = ohlcv_path
+        else:
+            print(f"✅ Using funding-enriched data: {funding_path}")
+            input_path = funding_path
+        
+        # Step 2: Build features from raw data
+        print(f"\n🔧 Step 2: Building features...")
+        features_path = build_and_save_features(raw_path=input_path)
+        
+        print(f"\n🎉 Pipeline completed successfully!")
+        print(f"📁 Output files:")
+        print(f"   Raw data: {input_path}")
+        print(f"   Features: {features_path}")
+        
+        # Verify output files
+        if input_path.exists():
+            raw_size = input_path.stat().st_size / (1024 * 1024)  # MB
+            print(f"   Raw file size: {raw_size:.2f} MB")
+        
+        if features_path.exists():
+            features_size = features_path.stat().st_size / (1024 * 1024)  # MB
+            print(f"   Features file size: {features_size:.2f} MB")
+        
+        return 0
+        
+    except Exception as e:
+        print(f"❌ Error in feature building pipeline: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    exit_code = main()
+    sys.exit(exit_code)
