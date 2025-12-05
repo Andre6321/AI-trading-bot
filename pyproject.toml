@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "bybit_ai_trader"
+version = "0.1.0"
+description = "A trading bot for Bybit using AI strategies."
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/yourusername/bybit_ai_trader"
+repository = "https://github.com/yourusername/bybit_ai_trader"
+keywords = ["trading", "bybit", "ai", "bot"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^1.3.0"
+numpy = "^1.21.0"
+matplotlib = "^3.4.0"
+ccxt = "^1.60.0"
+scikit-learn = "^0.24.0"
+xgboost = "^1.4.0"
+pyarrow = "^5.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
