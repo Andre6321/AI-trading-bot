@@ -109,11 +109,12 @@ class TradingBot:
             # Set leverage for live trading
             self.client.set_leverage(self.symbol, self.config.get("leverage", 1))
         
-        # Initialize data fetcher
+        # Initialize data fetcher (increased buffer for enhanced features)
         self.data_fetcher = DataFetcher(
             client=self.client,
             symbol=self.symbol,
-            interval=self.interval
+            interval=self.interval,
+            buffer_size=600  # Increased for multi-timeframe features
         )
         
         # Initialize risk manager
@@ -195,7 +196,7 @@ class TradingBot:
             self.logger.warning(f"Cannot open position: {reason}")
             return
         
-        # Calculate position size
+        # Calculate position size (now with confidence-based scaling)
         position_size = self.risk_manager.calculate_position_size(
             account_balance=balance,
             entry_price=current_price,
@@ -203,10 +204,22 @@ class TradingBot:
             signal_confidence=confidence
         )
         
-        # Calculate SL/TP
+        # Get latest features for volatility data
+        features = self.data_fetcher.get_latest_features()
+        atr_pct = None
+        volatility_regime = "normal"
+        
+        if features:
+            # Extract ATR percentage if available (features is a dict)
+            atr_pct = features.get('atr_pct', None)
+            volatility_regime = features.get('volatility_regime', 'normal')
+        
+        # Calculate dynamic SL/TP based on volatility
         stop_loss, take_profit = self.risk_manager.calculate_stop_loss_take_profit(
             entry_price=current_price,
-            side=side
+            side=side,
+            atr_pct=atr_pct,
+            volatility_regime=volatility_regime
         )
         
         # Validate order

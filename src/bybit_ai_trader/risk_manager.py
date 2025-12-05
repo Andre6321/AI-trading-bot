@@ -84,16 +84,18 @@ class RiskManager:
         account_balance: float,
         entry_price: float,
         side: str,
-        signal_confidence: float = 1.0
+        signal_confidence: float = 1.0,
+        atr_pct: float = None
     ) -> float:
         """
-        Calculate position size based on risk parameters.
+        Calculate position size based on risk parameters with confidence scaling.
         
         Args:
             account_balance: Total account balance in USD
             entry_price: Expected entry price
             side: "Buy" or "Sell"
             signal_confidence: Signal confidence (0-1), scales position size
+            atr_pct: ATR as percentage of price (for volatility adjustment)
             
         Returns:
             Position size in base currency
@@ -105,8 +107,21 @@ class RiskManager:
         # Position size = Risk amount / (Entry price * Stop loss %)
         position_value_usd = risk_amount / self.stop_loss_pct
         
-        # Scale by signal confidence
-        position_value_usd *= signal_confidence
+        # CONFIDENCE-BASED SCALING
+        # 70%+ confidence = 100% of calculated size
+        # 60-70% confidence = 70% of size  
+        # 55-60% confidence = 50% of size
+        # Below 55% = don't trade (handled by strategy)
+        if signal_confidence >= 0.70:
+            confidence_multiplier = 1.0
+        elif signal_confidence >= 0.60:
+            confidence_multiplier = 0.7
+        elif signal_confidence >= 0.55:
+            confidence_multiplier = 0.5
+        else:
+            confidence_multiplier = 0.3
+        
+        position_value_usd *= confidence_multiplier
         
         # Apply maximum position size limit
         position_value_usd = min(position_value_usd, self.max_position_size_usd)
@@ -123,7 +138,7 @@ class RiskManager:
         
         logger.info(
             f"Position size calculated: ${position_value_usd:.2f} = {position_size:.4f} @ ${entry_price:.2f} "
-            f"(Risk: ${risk_amount:.2f}, Confidence: {signal_confidence:.2f})"
+            f"(Risk: ${risk_amount:.2f}, Confidence: {signal_confidence:.2f}, Multiplier: {confidence_multiplier:.2f})"
         )
         
         return position_size
@@ -131,28 +146,61 @@ class RiskManager:
     def calculate_stop_loss_take_profit(
         self,
         entry_price: float,
-        side: str
+        side: str,
+        atr_pct: float = None,
+        volatility_regime: str = "normal"
     ) -> Tuple[float, float]:
         """
-        Calculate stop-loss and take-profit prices.
+        Calculate dynamic stop-loss and take-profit based on volatility.
         
         Args:
             entry_price: Entry price
             side: "Buy" or "Sell"
+            atr_pct: ATR as percentage of price (for dynamic adjustment)
+            volatility_regime: "low", "normal", or "high"
             
         Returns:
             Tuple of (stop_loss_price, take_profit_price)
         """
+        # Base SL/TP percentages
+        sl_pct = self.stop_loss_pct
+        tp_pct = self.take_profit_pct
+        
+        # DYNAMIC ADJUSTMENT BASED ON VOLATILITY
+        if atr_pct is not None:
+            # If ATR is high, widen stops to avoid premature stop-outs
+            # If ATR is low, tighten stops for better risk/reward
+            if atr_pct > 0.03:  # High volatility (ATR > 3%)
+                sl_pct *= 1.5  # Wider stops
+                tp_pct *= 1.5
+                logger.debug(f"High volatility detected (ATR {atr_pct:.2%}), widening SL/TP")
+            elif atr_pct < 0.015:  # Low volatility (ATR < 1.5%)
+                sl_pct *= 0.75  # Tighter stops
+                tp_pct *= 0.75
+                logger.debug(f"Low volatility detected (ATR {atr_pct:.2%}), tightening SL/TP")
+        
+        # Alternative: use volatility regime
+        elif volatility_regime == "high":
+            sl_pct *= 1.5
+            tp_pct *= 1.5
+        elif volatility_regime == "low":
+            sl_pct *= 0.75
+            tp_pct *= 0.75
+        
+        # Calculate actual prices
         if side == "Buy":
             # Long position
-            stop_loss = entry_price * (1 - self.stop_loss_pct)
-            take_profit = entry_price * (1 + self.take_profit_pct)
+            stop_loss = entry_price * (1 - sl_pct)
+            take_profit = entry_price * (1 + tp_pct)
         else:
             # Short position
-            stop_loss = entry_price * (1 + self.stop_loss_pct)
-            take_profit = entry_price * (1 - self.take_profit_pct)
+            stop_loss = entry_price * (1 + sl_pct)
+            take_profit = entry_price * (1 - tp_pct)
         
-        logger.debug(f"SL/TP calculated for {side}: SL=${stop_loss:.2f}, TP=${take_profit:.2f}")
+        logger.info(
+            f"Dynamic SL/TP for {side}: SL=${stop_loss:.2f} ({sl_pct:.2%}), "
+            f"TP=${take_profit:.2f} ({tp_pct:.2%})"
+        )
         return stop_loss, take_profit
     
     def can_open_new_position(
