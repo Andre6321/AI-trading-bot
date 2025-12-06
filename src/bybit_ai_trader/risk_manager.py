@@ -148,59 +148,91 @@ class RiskManager:
         entry_price: float,
         side: str,
         atr_pct: float = None,
-        volatility_regime: str = "normal"
+        volatility_regime: str = "normal",
+        market_regime: str = None
     ) -> Tuple[float, float]:
         """
-        Calculate volatility-adaptive stop-loss and take-profit using data-driven optimal levels.
+        Calculate regime-aware stop-loss and take-profit levels.
         
-        Based on 5-year historical analysis:
-        - Low volatility (ATR < 0.25%): SL=5.0%, TP=2.0% (Win Rate: 77.0%)
-        - Normal volatility (0.25% < ATR < 0.50%): SL=5.0%, TP=3.0% (Win Rate: 70.6%)
-        - High volatility (ATR > 0.50%): SL=8.0%, TP=4.0% (Win Rate: 80.8%, Expectancy: 1.7%)
+        Combines volatility-adaptive levels with market regime adjustments:
+        
+        VOLATILITY REGIMES (from 5-year analysis):
+        - Low volatility (ATR < 0.25%): SL=5.0%, TP=2.0%
+        - Normal volatility (0.25% < ATR < 0.50%): SL=5.0%, TP=3.0%
+        - High volatility (ATR > 0.50%): SL=8.0%, TP=4.0%
+        
+        MARKET REGIME ADJUSTMENTS:
+        - BULL: Wider TP, tighter SL (ride trends, cut losses fast)
+        - BEAR: Tighter TP, wider SL (take profits quickly, avoid whipsaws)
+        - SIDEWAYS: Balanced SL/TP (mean reversion expected)
         
         Args:
             entry_price: Entry price
             side: "Buy" or "Sell"
             atr_pct: ATR as percentage of price (for volatility regime detection)
             volatility_regime: "low", "normal", or "high" (can override ATR-based detection)
+            market_regime: "bull", "bear", or "sideways" (for regime-specific adjustments)
             
         Returns:
             Tuple of (stop_loss_price, take_profit_price)
         """
-        # VOLATILITY-ADAPTIVE SL/TP (Data-driven from 5-year optimization)
+        # Step 1: Determine base SL/TP from volatility
         if atr_pct is not None:
             # Determine volatility regime from ATR percentiles
             if atr_pct < 0.0025:  # Low volatility (< 0.25%)
                 sl_pct = 0.05  # 5%
                 tp_pct = 0.02  # 2%
-                regime = "LOW"
+                vol_regime = "LOW"
             elif atr_pct < 0.005:  # Normal volatility (0.25% - 0.50%)
                 sl_pct = 0.05  # 5%
                 tp_pct = 0.03  # 3%
-                regime = "NORMAL"
+                vol_regime = "NORMAL"
             else:  # High volatility (> 0.50%)
                 sl_pct = 0.08  # 8%
                 tp_pct = 0.04  # 4%
-                regime = "HIGH"
+                vol_regime = "HIGH"
             
             logger.debug(
-                f"{regime} volatility regime (ATR {atr_pct:.3%}): "
-                f"Using optimized SL={sl_pct:.1%}/TP={tp_pct:.1%}"
+                f"{vol_regime} volatility (ATR {atr_pct:.3%}): "
+                f"Base SL={sl_pct:.1%}/TP={tp_pct:.1%}"
             )
         
         # Fallback to base percentages or regime override
         elif volatility_regime == "low":
             sl_pct = 0.05
             tp_pct = 0.02
-            regime = "LOW"
+            vol_regime = "LOW"
         elif volatility_regime == "high":
             sl_pct = 0.08
             tp_pct = 0.04
-            regime = "HIGH"
+            vol_regime = "HIGH"
         else:  # normal or default
             sl_pct = self.stop_loss_pct
             tp_pct = self.take_profit_pct
-            regime = "DEFAULT"
+            vol_regime = "DEFAULT"
+        
+        # Step 2: Apply market regime adjustments
+        regime_info = vol_regime
+        if market_regime:
+            regime_info = f"{vol_regime}+{market_regime.upper()}"
+            
+            if market_regime == 'bull':
+                # Bull: Widen TP (let winners run), slightly tighter SL
+                tp_pct = tp_pct * 1.5  # +50% wider TP
+                sl_pct = sl_pct * 0.9  # -10% tighter SL
+                logger.debug(f"BULL regime adjustment: TP +50%, SL -10%")
+                
+            elif market_regime == 'bear':
+                # Bear: Tighter TP (take profits fast), wider SL (avoid whipsaws)
+                tp_pct = tp_pct * 0.7  # -30% tighter TP
+                sl_pct = sl_pct * 1.2  # +20% wider SL
+                logger.debug(f"BEAR regime adjustment: TP -30%, SL +20%")
+                
+            elif market_regime == 'sideways':
+                # Sideways: Balanced, slightly tighter both (mean reversion)
+                tp_pct = tp_pct * 0.85  # -15% tighter TP
+                sl_pct = sl_pct * 0.85  # -15% tighter SL
+                logger.debug(f"SIDEWAYS regime adjustment: Both -15% (mean reversion)")
         
         # Calculate actual prices
         if side == "Buy":
@@ -213,7 +245,7 @@ class RiskManager:
             take_profit = entry_price * (1 - tp_pct)
         
         logger.info(
-            f"Volatility-adaptive SL/TP ({regime}) for {side}: "
+            f"Regime-aware SL/TP ({regime_info}) for {side}: "
             f"SL=${stop_loss:.2f} ({sl_pct:.2%}), TP=${take_profit:.2f} ({tp_pct:.2%})"
         )
         return stop_loss, take_profit
