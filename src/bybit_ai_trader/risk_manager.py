@@ -211,21 +211,21 @@ class RiskManager:
             tp_pct = self.take_profit_pct
             vol_regime = "DEFAULT"
         
-        # Step 2: Apply market regime adjustments
+        # Step 2: Apply market regime adjustments (LOCAL variables only - never mutate self)
         regime_info = vol_regime
         if market_regime:
             regime_info = f"{vol_regime}+{market_regime.upper()}"
             
             if market_regime == 'bull':
                 # Bull: Widen TP (let winners run), slightly tighter SL
-                tp_pct = tp_pct * 1.5  # +50% wider TP
-                sl_pct = sl_pct * 0.9  # -10% tighter SL
+                tp_pct = tp_pct * 1.5
+                sl_pct = sl_pct * 0.9
                 logger.debug(f"BULL regime adjustment: TP +50%, SL -10%")
                 
             elif market_regime == 'bear':
                 # Bear: Tighter TP (take profits fast), wider SL (avoid whipsaws)
-                tp_pct = tp_pct * 0.7  # -30% tighter TP
-                sl_pct = sl_pct * 1.2  # +20% wider SL
+                tp_pct = tp_pct * 0.7
+                sl_pct = sl_pct * 1.2
                 logger.debug(f"BEAR regime adjustment: TP -30%, SL +20%")
                 
             elif market_regime == 'sideways':
@@ -325,18 +325,21 @@ class RiskManager:
             "take_profit_pct": self.take_profit_pct * 100
         }
     
-    def adjust_for_volatility(self, volatility_multiplier: float):
+    def adjust_for_volatility(self, volatility_multiplier: float) -> Tuple[float, float]:
         """
-        Adjust risk parameters based on market volatility.
+        Return volatility-adjusted SL/TP percentages WITHOUT mutating instance state.
         
         Args:
             volatility_multiplier: Multiplier for risk parameters (e.g., 1.5 for high volatility)
+            
+        Returns:
+            Tuple of (adjusted_sl_pct, adjusted_tp_pct)
         """
-        # Widen stop loss in high volatility
-        self.stop_loss_pct *= volatility_multiplier
-        self.take_profit_pct *= volatility_multiplier
+        adjusted_sl = self.stop_loss_pct * volatility_multiplier
+        adjusted_tp = self.take_profit_pct * volatility_multiplier
         
-        logger.info(f"Risk parameters adjusted for volatility ({volatility_multiplier:.2f}x)")
+        logger.info(f"Volatility adjustment ({volatility_multiplier:.2f}x): SL={adjusted_sl:.4f}, TP={adjusted_tp:.4f}")
+        return adjusted_sl, adjusted_tp
     
     def validate_order_parameters(
         self,

@@ -1,0 +1,270 @@
+// =============================================================================
+// BTC Mean-Reversion + Momentum Strategy (V3)
+// Based on ML deep analysis of 43,000+ hours of BTCUSDT data
+//
+// KEY FINDINGS FROM ANALYSIS:
+//   1. RSI > 75-80: Momentum continuation (+0.26% over 12h, p<0.0001)
+//   2. High-volume UP candles: Continuation signal (+0.09% at 4h, p=0.018)
+//   3. Low volatility (bottom 25% ATR): Model inverts - DON'T TRADE
+//   4. Mean-reversion: High momentum/RSI/CCI -> negative future returns
+//   5. MACD negative lagged correlation (strongest at lag 4-12h)
+//
+// STRATEGY:
+//   LONG entries based on combined signal scoring.
+//   No SHORT entries (BTC has long bias + funding rate considerations).
+//   ATR-based dynamic SL/TP. Regime filter excludes low-vol.
+//
+// RECOMMENDED SETTINGS:
+//   Timeframe: 1H (optimized for this)
+//   Symbol: BTCUSDT Perpetual
+//   Capital: Start small ($500-1000), scale after validation
+//
+// DISCLAIMER: This is a research tool. Past statistical edges may not persist.
+//             Always paper trade first. Never risk more than you can afford.
+// =============================================================================
+
+//@version=5
+strategy("BTC ML-Informed Strategy V3",
+     overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=10,
+     initial_capital=10000,
+     commission_type=strategy.commission.percent,
+     commission_value=0.075,
+     slippage=2,
+     pyramiding=0,
+     calc_on_every_tick=false)
+
+// =============================================================================
+// INPUTS
+// =============================================================================
+
+// -- Signal Thresholds --
+grp_signal = "Signal Settings"
+rsi_len       = input.int(14, "RSI Length", group=grp_signal)
+rsi_ob        = input.float(75, "RSI Overbought (Momentum)", minval=60, maxval=90, group=grp_signal)
+rsi_os        = input.float(30, "RSI Oversold", minval=10, maxval=40, group=grp_signal)
+cci_len       = input.int(20, "CCI Length", group=grp_signal)
+cci_oversold  = input.float(-100, "CCI Oversold Level", group=grp_signal)
+vol_spike_mult = input.float(2.0, "Volume Spike Multiplier", minval=1.2, maxval=5.0, step=0.1, group=grp_signal)
+min_score     = input.int(2, "Minimum Signal Score (1-5)", minval=1, maxval=5, group=grp_signal)
+
+// -- Risk Management --
+grp_risk = "Risk Management"
+atr_len       = input.int(14, "ATR Length", group=grp_risk)
+tp_mult       = input.float(3.0, "Take Profit (ATR multiplier)", minval=1.0, maxval=8.0, step=0.5, group=grp_risk)
+sl_mult       = input.float(2.0, "Stop Loss (ATR multiplier)", minval=0.5, maxval=4.0, step=0.5, group=grp_risk)
+max_hold_bars = input.int(12, "Max Holding Period (bars)", minval=4, maxval=48, group=grp_risk)
+risk_pct      = input.float(2.0, "Risk Per Trade %", minval=0.5, maxval=5.0, step=0.5, group=grp_risk)
+
+// -- Regime Filter --
+grp_regime = "Regime Filter"
+use_regime_filter = input.bool(true, "Enable Volatility Regime Filter", group=grp_regime)
+atr_pct_lookback  = input.int(200, "ATR% Percentile Lookback", minval=50, maxval=500, group=grp_regime)
+atr_pct_threshold = input.float(25, "Exclude Bottom N% Volatility", minval=5, maxval=50, group=grp_regime)
+
+// -- Visual --
+grp_visual = "Display"
+show_signals  = input.bool(true, "Show Signal Labels", group=grp_visual)
+show_regime   = input.bool(true, "Show Regime Background", group=grp_visual)
+show_tp_sl    = input.bool(true, "Show TP/SL Lines", group=grp_visual)
+
+// =============================================================================
+// INDICATORS
+// =============================================================================
+
+// Core indicators
+rsi_val   = ta.rsi(close, rsi_len)
+cci_val   = ta.cci(close, cci_len)
+atr_val   = ta.atr(atr_len)
+atr_pct   = (atr_val / close) * 100
+
+// MACD
+[macd_line, signal_line, macd_hist] = ta.macd(close, 12, 26, 9)
+
+// Volume analysis
+vol_ma    = ta.sma(volume, 20)
+vol_spike = volume > (vol_ma * vol_spike_mult)
+up_candle = close > open
+
+// Bollinger Bands (for position / width)
+[bb_upper, bb_mid, bb_lower] = ta.bb(close, 20, 2.0)
+bb_width  = (bb_upper - bb_lower) / bb_mid * 100
+bb_pos    = (close - bb_lower) / (bb_upper - bb_lower)
+
+// Momentum (20-period rate of change)
+roc_20    = ta.roc(close, 20)
+
+// Williams %R
+wpr_val   = ta.wpr(14)
+
+// Moving averages for trend
+ma_20     = ta.sma(close, 20)
+ma_50     = ta.sma(close, 50)
+
+// ADX for trend strength
+[diplus, diminus, adx_val] = ta.dmi(14, 14)
+
+// =============================================================================
+// REGIME FILTER
+// =============================================================================
+
+// Calculate ATR% percentile over lookback window
+// Low volatility = bottom 25% = DON'T TRADE (model inverts)
+atr_pct_sorted = ta.percentrank(atr_pct, atr_pct_lookback)
+regime_ok = use_regime_filter ? atr_pct_sorted > atr_pct_threshold : true
+
+// Background color for regime
+bgcolor(show_regime and not regime_ok ? color.new(color.red, 92) : na, title="Low Vol Zone")
+bgcolor(show_regime and regime_ok and atr_pct_sorted > 75 ? color.new(color.green, 95) : na, title="High Vol Zone")
+
+// =============================================================================
+// SIGNAL SCORING SYSTEM
+// =============================================================================
+// Each condition adds +1 to signal score. Higher score = higher conviction.
+
+signal_score = 0
+
+// Signal 1: RSI Momentum (RSI > 75 shows continuation, p<0.0001)
+sig_rsi_momentum = rsi_val > rsi_ob
+signal_score += sig_rsi_momentum ? 1 : 0
+
+// Signal 2: Volume spike on UP candle (continuation, p=0.018)
+sig_vol_up = vol_spike and up_candle
+signal_score += sig_vol_up ? 1 : 0
+
+// Signal 3: CCI oversold bounce (mean-reversion entry)
+sig_cci_bounce = cci_val < cci_oversold and cci_val > cci_val[1]  // CCI turning up from oversold
+signal_score += sig_cci_bounce ? 1 : 0
+
+// Signal 4: MACD histogram turning positive (momentum shift)
+sig_macd_turn = macd_hist > 0 and macd_hist[1] < 0
+signal_score += sig_macd_turn ? 1 : 0
+
+// Signal 5: Price above 20 MA AND 20 MA > 50 MA (trend aligned)
+sig_trend = close > ma_20 and ma_20 > ma_50
+signal_score += sig_trend ? 1 : 0
+
+// =============================================================================
+// ENTRY CONDITIONS
+// =============================================================================
+
+// Combined entry: score >= threshold AND regime OK AND not already in position
+long_entry = signal_score >= min_score and regime_ok and strategy.position_size == 0
+
+// =============================================================================
+// POSITION SIZING
+// =============================================================================
+
+// ATR-based position sizing
+sl_distance = sl_mult * atr_val
+tp_distance = tp_mult * atr_val
+sl_pct = sl_distance / close * 100
+
+// Risk-based position size (as % of equity)
+// risk_pct of equity / SL distance = position size
+pos_size_pct = risk_pct / sl_pct * 100
+pos_size_pct := math.min(pos_size_pct, 25)  // Cap at 25% of equity
+
+// =============================================================================
+// TRADE MANAGEMENT
+// =============================================================================
+
+var float entry_price = na
+var int   entry_bar_idx = na
+var float tp_level = na
+var float sl_level = na
+
+if long_entry
+    entry_price := close
+    entry_bar_idx := bar_index
+    tp_level := close + tp_distance
+    sl_level := close - sl_distance
+
+    strategy.entry("Long", strategy.long, qty=pos_size_pct)
+    strategy.exit("TP/SL", "Long", limit=tp_level, stop=sl_level)
+
+// Timeout exit
+bars_in_trade = strategy.position_size != 0 ? bar_index - entry_bar_idx : 0
+if strategy.position_size != 0 and bars_in_trade >= max_hold_bars
+    strategy.close("Long", comment="TIMEOUT")
+
+// =============================================================================
+// VISUALIZATION
+// =============================================================================
+
+// Signal score as histogram
+plot(signal_score, "Signal Score", color=signal_score >= min_score and regime_ok ? color.lime : color.gray,
+     style=plot.style_columns, display=display.pane)
+
+// TP/SL lines (only when in position)
+plot(show_tp_sl and strategy.position_size > 0 ? tp_level : na, "TP Level",
+     color=color.green, style=plot.style_linebr, linewidth=2)
+plot(show_tp_sl and strategy.position_size > 0 ? sl_level : na, "SL Level",
+     color=color.red, style=plot.style_linebr, linewidth=2)
+
+// Entry signals
+plotshape(show_signals and long_entry, title="Long Signal",
+     location=location.belowbar, style=shape.triangleup,
+     size=size.small, color=color.lime, text="L")
+
+// Score labels on strong signals
+if show_signals and long_entry and signal_score >= 3
+    label.new(bar_index, low, str.tostring(signal_score),
+         color=color.new(color.lime, 20), textcolor=color.white,
+         style=label.style_label_up, size=size.small)
+
+// =============================================================================
+// INFO TABLE
+// =============================================================================
+
+var table info_table = table.new(position.top_right, 2, 10, bgcolor=color.new(color.black, 80))
+
+if barstate.islast
+    table.cell(info_table, 0, 0, "Indicator", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 0, "Value", text_color=color.white, text_size=size.small)
+
+    table.cell(info_table, 0, 1, "RSI", text_color=color.white, text_size=size.small)
+    rsi_color = rsi_val > rsi_ob ? color.lime : rsi_val < rsi_os ? color.red : color.gray
+    table.cell(info_table, 1, 1, str.tostring(rsi_val, "#.0"), text_color=rsi_color, text_size=size.small)
+
+    table.cell(info_table, 0, 2, "CCI", text_color=color.white, text_size=size.small)
+    cci_color = cci_val < cci_oversold ? color.red : cci_val > 100 ? color.lime : color.gray
+    table.cell(info_table, 1, 2, str.tostring(cci_val, "#.0"), text_color=cci_color, text_size=size.small)
+
+    table.cell(info_table, 0, 3, "ATR%", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 3, str.tostring(atr_pct, "#.###") + "%", text_color=color.white, text_size=size.small)
+
+    table.cell(info_table, 0, 4, "Vol Regime", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 4, regime_ok ? "OK" : "LOW VOL", text_color=regime_ok ? color.lime : color.red, text_size=size.small)
+
+    table.cell(info_table, 0, 5, "Signal Score", text_color=color.white, text_size=size.small)
+    score_color = signal_score >= min_score ? color.lime : color.gray
+    table.cell(info_table, 1, 5, str.tostring(signal_score) + "/" + str.tostring(5), text_color=score_color, text_size=size.small)
+
+    table.cell(info_table, 0, 6, "MACD Hist", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 6, str.tostring(macd_hist, "#.0"), text_color=macd_hist > 0 ? color.lime : color.red, text_size=size.small)
+
+    table.cell(info_table, 0, 7, "BB Position", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 7, str.tostring(bb_pos, "#.##"), text_color=color.white, text_size=size.small)
+
+    table.cell(info_table, 0, 8, "Vol Spike", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 8, vol_spike ? "YES" : "no", text_color=vol_spike ? color.lime : color.gray, text_size=size.small)
+
+    table.cell(info_table, 0, 9, "Position", text_color=color.white, text_size=size.small)
+    table.cell(info_table, 1, 9, strategy.position_size > 0 ? "LONG" : "FLAT",
+         text_color=strategy.position_size > 0 ? color.lime : color.gray, text_size=size.small)
+
+
+// =============================================================================
+// ALERTS
+// =============================================================================
+
+alertcondition(long_entry, title="Long Entry Signal",
+     message="BTC V3: LONG signal (score={{plot_0}}) at {{close}}")
+
+alertcondition(not regime_ok, title="Low Volatility Warning",
+     message="BTC V3: LOW VOLATILITY regime - avoid new trades")
+
+alertcondition(signal_score >= 4, title="Strong Signal (4+)",
+     message="BTC V3: STRONG signal (score>=4) at {{close}}")

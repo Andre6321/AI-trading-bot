@@ -1,0 +1,344 @@
+
+====================================================================================================
+  NASDAQ EDGE ANALYSIS
+====================================================================================================
+
+  Date: 2026-02-25 03:10
+  Instruments: QQQ (NASDAQ-100 ETF), ^VIX, NQ=F (futures)
+
+[1] Downloading QQQ hourly data...
+    QQQ 1H: 3470 bars, 2024-02-26 14:30:00+00:00 → 2026-02-24 16:30:00+00:00
+[2] Downloading QQQ 5-min data (incl pre/post market)...
+    QQQ 5M: 10257 bars, 2025-11-26 09:00:00+00:00 → 2026-02-24 17:10:00+00:00
+[3] Downloading QQQ 2-min data (incl pre/post market)...
+    QQQ 2M: 14037 bars, 2026-01-08 00:00:00+00:00 → 2026-02-24 17:10:00+00:00
+[4] Downloading QQQ 1-min data (incl pre/post market)...
+    QQQ 1M: 6183 bars, 2026-02-13 09:00:00+00:00 → 2026-02-24 17:10:00+00:00
+[5] Downloading QQQ daily data (10yr)...
+    QQQ Daily: 2515 bars, 2016-02-24 00:00:00 → 2026-02-24 00:00:00
+[6] Downloading VIX data...
+    VIX: 2515 bars
+[7] Downloading NQ=F 1H data...
+    NQ=F 1H: 11390 bars
+
+  All data downloaded.
+
+
+====================================================================================================
+  1. HOURLY RETURN PATTERNS BY TIME-OF-DAY
+====================================================================================================
+
+  Hour(ET)  Mean Ret%   Median%    Std%   Count  %Pos   Avg Vol     t-stat  p-val
+  -----------------------------------------------------------------------------------------------
+  09:00     +0.0786%   +0.0719%  0.9566%    499  54.6%  10,064,928  +1.836  0.0670 *  
+  10:00     -0.0196%   +0.0054%  0.3789%    500  50.8%  5,782,440  -1.158  0.2476    
+  11:00     +0.0148%   +0.0275%  0.3401%    499  55.1%  4,542,592  +0.970  0.3325    
+  12:00     +0.0007%   +0.0126%  0.4060%    492  51.4%  3,824,670  +0.039  0.9693    
+  13:00     +0.0159%   +0.0166%  0.3500%    493  54.2%  4,111,640  +1.010  0.3129    
+  14:00     -0.0173%   +0.0042%  0.2868%    493  51.3%  4,529,230  -1.341  0.1806    
+  15:00     +0.0012%   +0.0033%  0.2848%    493  50.9%  5,247,819  +0.091  0.9272    
+
+  Annualized Sharpe by hour (252 trading days):
+    09:00  Sharpe = +1.30
+    10:00  Sharpe = -0.82
+    11:00  Sharpe = +0.69
+    12:00  Sharpe = +0.03
+    13:00  Sharpe = +0.72
+    14:00  Sharpe = -0.96
+    15:00  Sharpe = +0.07
+
+====================================================================================================
+  2. FIRST HOUR vs LAST HOUR vs MID-DAY
+====================================================================================================
+
+  First Hour (09:30-10:30):
+    Mean return:  +0.0786%  (t=1.84, p=0.0670)
+    Median:       +0.0719%
+    Std:          0.9566%
+    Volatility:   15.2% annualised
+    %Positive:    54.7%
+    Avg Volume:   10,064,928
+    Count:        499
+
+  Last Hour (15:00-16:00):
+    Mean return:  +0.0012%  (t=0.09, p=0.9272)
+    Median:       +0.0033%
+    Std:          0.2848%
+    Volatility:   4.5% annualised
+    %Positive:    50.9%
+    Avg Volume:   5,247,819
+    Count:        493
+
+  Mid-Day (11:00-14:00):
+    Mean return:  +0.0105%  (t=1.10, p=0.2700)
+    Median:       +0.0207%
+    Std:          0.3662%
+    Volatility:   5.8% annualised
+    %Positive:    53.6%
+    Avg Volume:   4,161,408
+    Count:        1484
+
+
+====================================================================================================
+  3. PRE-NYSE OPEN STRATEGY
+====================================================================================================
+
+  Idea: Enter a trade 2 minutes before NYSE open (9:28 ET),
+  ride the opening volatility burst.
+
+
+  --- 3a. Using 2-minute bars around the open ---
+
+  Days analysed: 28
+
+  Horizon    Dir       Mean%  Median%     Std%   %Pos  t-stat   p-val  Sharpe
+  ---------------------------------------------------------------------------
+  2min       long   -0.0368% -0.0179% 0.1649%  42.9% -1.180  0.2483 -3.54    
+  2min       short  +0.0368% +0.0179% 0.1649%  57.1% +1.180  0.2483 +3.54    
+  4min       long   -0.0043% -0.0173% 0.2133%  46.4% -0.106  0.9167 -0.32    
+  4min       short  +0.0043% +0.0173% 0.2133%  53.6% +0.106  0.9167 +0.32    
+  10min      long   +0.0509% -0.0066% 0.3135%  50.0% +0.860  0.3975 +2.58    
+  10min      short  -0.0509% +0.0066% 0.3135%  50.0% -0.860  0.3975 -2.58    
+  30min      long   -0.0591% +0.0318% 0.5044%  50.0% -0.620  0.5407 -1.86    
+  30min      short  +0.0591% -0.0318% 0.5044%  50.0% +0.620  0.5407 +1.86    
+  60min      long   -0.0192% +0.0985% 0.7191%  53.6% -0.141  0.8889 -0.42    
+  60min      short  +0.0192% -0.0985% 0.7191%  46.4% +0.141  0.8889 +0.42    
+
+  --- 3b. Using 5-minute bars around the open ---
+
+  Days analysed: 56
+
+  Strategy: BUY at open (9:30), sell after N minutes
+  Horizon       Mean%  Median%     Std%   %Pos  t-stat   p-val  Sharpe
+  -----------------------------------------------------------------
+  5min       +0.0059% -0.0051% 0.2076%  50.0% +0.212  0.8327 +0.45    
+  10min      +0.0228% -0.0205% 0.2715%  48.2% +0.628  0.5329 +1.33    
+  15min      +0.0114% +0.0130% 0.3161%  51.8% +0.269  0.7889 +0.57    
+  30min      -0.0191% +0.0073% 0.4344%  51.8% -0.329  0.7433 -0.70    
+  60min      -0.0380% -0.0062% 0.5855%  50.0% -0.486  0.6290 -1.03    
+
+  --- 3c. Pre-market momentum → opening trade direction ---
+
+  If pre-market (9:00-9:30) is UP → go LONG at open
+  If pre-market (9:00-9:30) is DOWN → go SHORT at open
+
+  5min     Continuation   mean=-0.0028% %pos=53.6% sharpe=-0.21 p=0.9211    
+  5min     Reversal       mean=+0.0028% %pos=46.4% sharpe=+0.21 p=0.9211    
+  10min    Continuation   mean=+0.0180% %pos=55.4% sharpe=+1.05 p=0.6230    
+  10min    Reversal       mean=-0.0180% %pos=44.6% sharpe=-1.05 p=0.6230    
+  15min    Continuation   mean=+0.0085% %pos=55.4% sharpe=+0.43 p=0.8413    
+  15min    Reversal       mean=-0.0085% %pos=44.6% sharpe=-0.43 p=0.8413    
+  30min    Continuation   mean=-0.0069% %pos=42.9% sharpe=-0.25 p=0.9058    
+  30min    Reversal       mean=+0.0069% %pos=55.4% sharpe=+0.25 p=0.9058    
+  60min    Continuation   mean=+0.0464% %pos=50.0% sharpe=+1.26 p=0.5551    
+  60min    Reversal       mean=-0.0464% %pos=50.0% sharpe=-1.26 p=0.5551    
+
+====================================================================================================
+  4. OVERNIGHT GAP ANALYSIS (10 YEARS)
+====================================================================================================
+
+  Period: 2016-02-25 → 2026-02-24 (2514 days)
+
+
+  --- 4a. Gap Statistics ---
+
+  Mean overnight gap:    +0.0515%
+  Median overnight gap:  +0.0857%
+  Std:                   0.8475%
+  % Gap Up:              56.9%
+  % Gap Down:            43.1%
+
+  --- 4b. Gap Fill Rate (does the gap get filled during the day?) ---
+
+  Gap UP (>0.1%) fill rate:   54.7% of 1226 days
+  Gap DOWN (<-0.1%) fill rate: 57.0% of 896 days
+    Gap > +0.1%: 1226 days, fill=55%, intraday mean=+0.028%
+    Gap < -0.1%:  896 days, fill=57%, intraday mean=+0.036%
+    Gap > +0.2%:  907 days, fill=47%, intraday mean=+0.025%
+    Gap < -0.2%:  674 days, fill=50%, intraday mean=+0.057%
+    Gap > +0.5%:  538 days, fill=37%, intraday mean=+0.048%
+    Gap < -0.5%:  419 days, fill=40%, intraday mean=+0.036%
+    Gap > +1.0%:  188 days, fill=26%, intraday mean=+0.132%
+    Gap < -1.0%:  167 days, fill=26%, intraday mean=+0.081%
+    Gap > +1.5%:   76 days, fill=21%, intraday mean=+0.215%
+    Gap < -1.5%:   87 days, fill=23%, intraday mean=+0.021%
+    Gap > +2.0%:   38 days, fill=21%, intraday mean=+0.112%
+    Gap < -2.0%:   39 days, fill=18%, intraday mean=+0.134%
+
+  --- 4c. Gap Fade Strategy (trade against the gap direction) ---
+
+  Strategy: If gap UP → SHORT at open, exit at close
+            If gap DOWN → LONG at open, exit at close
+
+  Gap >0.00%: 2514 trades, mean=-0.0000%, %pos=49.9%, sharpe=-0.00, p=0.9985    
+  Gap >0.10%: 2122 trades, mean=-0.0011%, %pos=49.6%, sharpe=-0.01, p=0.9658    
+  Gap >0.25%: 1581 trades, mean=+0.0103%, %pos=49.8%, sharpe=+0.14, p=0.7298    
+  Gap >0.50%:  957 trades, mean=-0.0109%, %pos=48.2%, sharpe=-0.13, p=0.7956    
+  Gap >0.75%:  585 trades, mean=+0.0051%, %pos=47.5%, sharpe=+0.06, p=0.9330    
+  Gap >1.00%:  355 trades, mean=-0.0318%, %pos=45.9%, sharpe=-0.31, p=0.7119    
+
+====================================================================================================
+  5. DAY-OF-WEEK EFFECTS (10 YEARS)
+====================================================================================================
+
+  Day             Mean%  Median%     Std%   %Pos  Count  t-stat   p-val
+  ----------------------------------------------------------------------
+  Monday       +0.1385% +0.2381% 1.4535%  62.0%   469  +2.064  0.0396 ** 
+  Tuesday      +0.1081% +0.1138% 1.3062%  56.2%   518  +1.884  0.0601 *  
+  Wednesday    +0.1421% +0.1613% 1.4225%  58.9%   514  +2.265  0.0239 ** 
+  Thursday     +0.0078% +0.0494% 1.4486%  52.2%   506  +0.121  0.9040    
+  Friday       +0.0237% +0.1003% 1.3571%  54.2%   507  +0.394  0.6940    
+
+  --- 5b. Overnight vs Intraday by Day-of-Week ---
+
+  Day          Overnight%  Intraday%     Better
+  ---------------------------------------------
+  Monday       +0.0126%    +0.1253%    INTRADAY
+  Tuesday      +0.1004%    +0.0079%    OVERNIGHT
+  Wednesday    +0.0831%    +0.0590%    OVERNIGHT
+  Thursday     +0.0325%    -0.0248%    OVERNIGHT
+  Friday       +0.0243%    -0.0007%    OVERNIGHT
+
+====================================================================================================
+  6. INTRADAY SESSION RETURNS (Hourly Data)
+====================================================================================================
+
+  Session                   Mean%  Median%     Std%   %Pos  Sharpe  Count
+  ------------------------------------------------------------------------
+  Open Rush (09-10)      -0.0059% +0.0031% 0.5534%  50.2% -0.17    500    
+  Morning (10-12)        -0.0043% +0.0405% 0.5460%  54.0% -0.12    500    
+  Lunch Chop (12-14)     +0.0160% +0.0245% 0.6118%  53.8% +0.42    493    
+  Power Hour (14-16)     -0.0160% +0.0124% 0.3800%  51.7% -0.67    493    
+
+====================================================================================================
+  7. MEAN REVERSION AFTER LARGE HOURLY MOVES
+====================================================================================================
+
+  After hourly move > +0.5%: next hour = +0.0313% (n=267, %neg=45%, p=0.448)
+  After hourly move < -0.5%: next hour = +0.0284% (n=268, %pos=49%, p=0.436)
+
+  After hourly move > +0.8%: next hour = +0.0672% (n=143, %neg=40%, p=0.258)
+  After hourly move < -0.8%: next hour = -0.0247% (n=132, %pos=41%, p=0.673)
+
+  After hourly move > +1.0%: next hour = +0.0591% (n=77, %neg=38%, p=0.435)
+  After hourly move < -1.0%: next hour = +0.0091% (n=79, %pos=46%, p=0.891)
+
+  After hourly move > +1.5%: next hour = -0.0342% (n=34, %neg=44%, p=0.825)
+  After hourly move < -1.5%: next hour = +0.0453% (n=38, %pos=42%, p=0.615)
+
+  After hourly move > +2.0%: next hour = +0.0443% (n=12, %neg=42%, p=0.907)
+  After hourly move < -2.0%: next hour = +0.0276% (n=14, %pos=36%, p=0.889)
+
+
+====================================================================================================
+  8. VIX REGIME × INTRADAY PATTERNS
+====================================================================================================
+
+  VIX Regime            Count  Mean Ret%     Std%   %Pos  Gap Mean%  Intraday%
+  ---------------------------------------------------------------------------
+  Low VIX (<15)          928  +0.2090%  0.7119%  63.6% +0.0915%   +0.1177%
+  Med VIX (15-20)        827  +0.1730%  1.0838%  57.4% +0.0946%   +0.0786%
+  High VIX (20-30)       607  -0.0844%  1.7021%  48.1% -0.0013%   -0.0831%
+  Very High (30+)        152  -0.4989%  3.2786%  44.1% -0.2166%   -0.2857%
+
+  --- 8b. Gap Fade by VIX Regime ---
+
+  Does gap fading work better in high/low VIX?
+
+  Low VIX (<15)        n= 464, mean=+0.0286%, sharpe=+0.68, p=0.3572    
+  Med VIX (15-20)      n= 532, mean=+0.0347%, sharpe=+0.59, p=0.3894    
+  High VIX (20-30)     n= 454, mean=-0.0020%, sharpe=-0.02, p=0.9748    
+  Very High (30+)      n= 131, mean=-0.1108%, sharpe=-0.76, p=0.5831    
+
+====================================================================================================
+  9. FIRST 5-MIN BAR → REST-OF-DAY PREDICTION
+====================================================================================================
+
+  Days analysed: 59
+  First 5-min UP:   30 days (51%)
+  First 5-min DOWN: 29 days (49%)
+
+  First bar UP → rest of day:    mean=-0.1190%, %pos=47%
+  First bar DOWN → rest of day:  mean=-0.0501%, %pos=48%
+
+  Continuation strategy: mean=-0.0359%, sharpe=-0.71, p=0.7336    
+
+  Reversal strategy: mean=+0.0359%, sharpe=+0.71, p=0.7336    
+
+====================================================================================================
+  10. CONSECUTIVE DAYS — MOMENTUM vs REVERSAL
+====================================================================================================
+
+  Streak                Count  Next Day%   %Pos  t-stat   p-val
+  ------------------------------------------------------------
+  After 1 up day         635  -0.0142%   53.9% -0.247  0.8047    
+  After 2 up days        342  +0.0693%   56.4% +1.104  0.2704    
+  After 3+ up days       445  +0.0273%   56.6% +0.535  0.5929    
+  After 1 down day       637  +0.1011%   56.8% +1.691  0.0913 *  
+  After 2 down days      274  +0.1583%   58.8% +1.627  0.1050    
+  After 3+ down days     176  +0.4268%   63.6% +3.688  0.0003 ***
+
+====================================================================================================
+  11. OPENING RANGE BREAKOUT (5-min data)
+====================================================================================================
+
+  Days analysed: 59
+  Avg opening range (15min): 0.510%
+  Broke UP:    71.2%
+  Broke DOWN:  76.3%
+  Both sides:  47.5%
+
+  Breakout LONG:  n=42, mean=-0.056%, %pos=55%
+  Breakout SHORT: n=45, mean=+0.037%, %pos=47%
+
+====================================================================================================
+  12. TRADE 2 MINUTES BEFORE NYSE OPEN — DETAILED
+====================================================================================================
+
+  1-minute data: 6183 bars, 2026-02-13 04:00:00-05:00 → 2026-02-24 12:10:00-05:00
+  9:28 entry bars found: 7
+
+  Enter at 9:28 (2 min before open), results:
+
+  Exit After      LONG%   SHORT%     Std% Long%Pos Short%Pos
+  -------------------------------------------------------
+  1 min       -0.0150% +0.0150% 0.0409%   57.1%    42.9%
+  2 min       -0.0076% +0.0076% 0.1219%   57.1%    42.9%
+  3 min       +0.0150% -0.0150% 0.1392%   71.4%    28.6%
+  5 min       +0.0390% -0.0390% 0.2458%   57.1%    42.9%
+  10 min       +0.1283% -0.1283% 0.2952%   42.9%    57.1%
+  15 min       +0.1106% -0.1106% 0.3586%   57.1%    42.9%
+  30 min       +0.0797% -0.0797% 0.4487%   57.1%    42.9%
+  60 min       +0.3427% -0.3427% 0.6292%   71.4%    28.6%
+
+  With pre-market momentum filter:
+    5 min: follow pre-mkt → mean=+0.0584%, %pos=71%
+    10 min: follow pre-mkt → mean=+0.0621%, %pos=86%
+    15 min: follow pre-mkt → mean=-0.1214%, %pos=43%
+    30 min: follow pre-mkt → mean=-0.3315%, %pos=14%
+
+====================================================================================================
+  SUMMARY OF FINDINGS
+====================================================================================================
+
+
+  This analysis examined NASDAQ (QQQ) across multiple timeframes looking
+  for exploitable edges. Key areas investigated:
+
+  1. TIME-OF-DAY: Which hours have statistically significant returns?
+  2. OPEN/CLOSE: Is the first/last hour more profitable?
+  3. PRE-OPEN ENTRY: Does entering 2 min before NYSE open capture edge?
+  4. GAP ANALYSIS: Do overnight gaps get filled? Is gap-fading profitable?
+  5. DAY-OF-WEEK: Do certain days have consistent directional bias?
+  6. SESSION SPLITS: Open rush vs mid-day vs power hour
+  7. MEAN REVERSION: Do large hourly moves reverse?
+  8. VIX REGIMES: Do patterns change with volatility?
+  9. FIRST BAR DIRECTION: Does the first 5-min bar predict the day?
+  10. CONSECUTIVE DAYS: Momentum vs reversal after streaks
+  11. OPENING RANGE BREAKOUT: Classic 15-min ORB strategy
+  12. 2-MIN PRE-OPEN: Detailed 1-minute analysis
+
+  Results saved to: outputs/nasdaq_edge_analysis.txt
+
+
+  Analysis complete at 2026-02-25 03:10:54

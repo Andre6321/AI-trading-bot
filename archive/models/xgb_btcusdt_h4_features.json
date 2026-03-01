@@ -1,0 +1,46 @@
+{
+  "feature_names": [
+    "log_ret_1h",
+    "log_ret_4h",
+    "log_ret_24h",
+    "ma_10",
+    "ma_20",
+    "ma_50",
+    "ma_100",
+    "rsi_14",
+    "atr_14",
+    "vol_24h",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "price_vs_ma_20",
+    "price_vs_ma_50",
+    "hl_spread_pct",
+    "momentum_3h",
+    "momentum_12h"
+  ],
+  "n_features": 19,
+  "model_params": {
+    "objective": "binary:logistic",
+    "max_depth": 4,
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "eval_metric": "logloss",
+    "early_stopping_rounds": 50,
+    "verbose": false
+  },
+  "training_info": {
+    "train_samples": 1327,
+    "valid_samples": 284,
+    "test_samples": 285,
+    "horizon_hours": 4,
+    "test_accuracy": 0.5614035087719298,
+    "test_roc_auc": 0.5754679802955665,
+    "best_iteration": 14,
+    "training_date": "2025-12-06T00:22:05.857240"
+  }
+}

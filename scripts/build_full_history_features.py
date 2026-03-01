@@ -29,6 +29,11 @@ def main():
     
     print(f"📥 Loading full history from: {raw_data_path}")
     df_raw = pd.read_parquet(raw_data_path)
+    
+    # Ensure timezone-naive timestamps (some sources provide UTC-aware)
+    if hasattr(df_raw['timestamp'].dt, 'tz') and df_raw['timestamp'].dt.tz is not None:
+        df_raw['timestamp'] = df_raw['timestamp'].dt.tz_localize(None)
+    
     print(f"   Loaded {len(df_raw)} rows ({(df_raw['timestamp'].max() - df_raw['timestamp'].min()).days} days)")
     
     # Build enhanced features
@@ -40,7 +45,7 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     print(f"💾 Saving enhanced features to: {output_path}")
-    df_enhanced.to_parquet(output_path, index=False)
+    df_enhanced.to_parquet(output_path, index=True)
     
     print(f"\n✅ Enhanced feature engineering completed!")
     print(f"   Input: {len(df_raw)} rows")

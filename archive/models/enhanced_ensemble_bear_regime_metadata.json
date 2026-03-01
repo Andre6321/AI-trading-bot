@@ -1,0 +1,19 @@
+{
+  "regime": "BEAR",
+  "train_samples": 3432,
+  "val_samples": 736,
+  "test_samples": 736,
+  "num_features": 108,
+  "xgb_val_auc": 0.7128756792724853,
+  "lgb_val_auc": 0.7059702044286719,
+  "ensemble_val_auc": 0.7135263021699753,
+  "test_roc_auc": 0.7471677463247257,
+  "test_accuracy": 0.6834239130434783,
+  "improvements": [
+    "Advanced feature engineering",
+    "Regime-specific hyperparameters",
+    "Stacked ensemble",
+    "Probability calibration",
+    "Balanced class weights"
+  ]
+}

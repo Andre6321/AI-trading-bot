@@ -1,0 +1,336 @@
+// =============================================================================
+// BTC Bidirectional Strategy (V4)
+// Based on ML deep analysis of 43,000+ hours of BTCUSDT data
+//
+// KEY IMPROVEMENTS OVER V3:
+//   1. BIDIRECTIONAL: Both LONG and SHORT entries
+//   2. Tighter barriers: TP=2.5x ATR, SL=1.5x ATR (higher win rate)
+//   3. Short signals based on:
+//      - RSI < 20-25: Continued decline (NOT mean-reversion for oversold!)
+//      - Volume spike on DOWN candle: Panic selling continuation
+//      - CCI > +200 and turning down: Exhaustion top
+//      - MACD histogram turning negative
+//      - Price below 20MA < 50MA: Bear trend
+//   4. Funding rate consideration: extreme positive funding = crowded longs
+//
+// DATA FINDINGS:
+//   - RSI > 80  → Bullish continuation (+0.26% at 12h, p<0.0001)
+//   - RSI < 20  → Continued decline (not mean-reversion!)
+//   - SL hit 34% of bars with 4x ATR TP → structural short opportunity
+//   - Funding rate positive 85% of time (longs pay shorts)
+//   - Low volatility → model inverts → DON'T TRADE
+//
+// RECOMMENDED SETTINGS:
+//   Timeframe: 1H  |  Symbol: BTCUSDT Perpetual
+//   Start: $500-1000  |  Risk: 1-2% per trade
+//
+// DISCLAIMER: Research tool. Paper trade first. Never risk what you can't lose.
+// =============================================================================
+
+//@version=5
+strategy("BTC ML Strategy V4 (Long+Short)",
+     overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=10,
+     initial_capital=10000,
+     commission_type=strategy.commission.percent,
+     commission_value=0.075,
+     slippage=2,
+     pyramiding=0,
+     calc_on_every_tick=false)
+
+// =============================================================================
+// INPUTS
+// =============================================================================
+
+// -- Signal Settings --
+grp_sig = "Signal Settings"
+rsi_len        = input.int(14, "RSI Length", group=grp_sig)
+rsi_long_thr   = input.float(75, "RSI Long Threshold (momentum)", minval=60, maxval=90, group=grp_sig)
+rsi_short_thr  = input.float(25, "RSI Short Threshold (decline)", minval=10, maxval=40, group=grp_sig)
+cci_len        = input.int(20, "CCI Length", group=grp_sig)
+cci_long_thr   = input.float(-100, "CCI Long (oversold bounce)", group=grp_sig)
+cci_short_thr  = input.float(200, "CCI Short (exhaustion top)", group=grp_sig)
+vol_spike_mult = input.float(2.0, "Volume Spike Multiplier", minval=1.2, maxval=5.0, step=0.1, group=grp_sig)
+min_long_score = input.int(2, "Min LONG Score (1-5)", minval=1, maxval=5, group=grp_sig)
+min_short_score = input.int(2, "Min SHORT Score (1-5)", minval=1, maxval=5, group=grp_sig)
+enable_shorts  = input.bool(true, "Enable SHORT Trades", group=grp_sig)
+
+// -- Risk Management --
+grp_risk = "Risk Management"
+atr_len        = input.int(14, "ATR Length", group=grp_risk)
+long_tp_mult   = input.float(2.5, "Long TP (ATR mult)", minval=1.0, maxval=8.0, step=0.5, group=grp_risk)
+long_sl_mult   = input.float(1.5, "Long SL (ATR mult)", minval=0.5, maxval=4.0, step=0.5, group=grp_risk)
+short_tp_mult  = input.float(2.5, "Short TP (ATR mult)", minval=1.0, maxval=8.0, step=0.5, group=grp_risk)
+short_sl_mult  = input.float(1.5, "Short SL (ATR mult)", minval=0.5, maxval=4.0, step=0.5, group=grp_risk)
+max_hold_bars  = input.int(12, "Max Holding Period (bars)", minval=4, maxval=48, group=grp_risk)
+risk_pct       = input.float(2.0, "Risk Per Trade %", minval=0.5, maxval=5.0, step=0.5, group=grp_risk)
+
+// -- Regime Filter --
+grp_regime = "Regime Filter"
+use_regime     = input.bool(true, "Enable Volatility Regime Filter", group=grp_regime)
+atr_lookback   = input.int(200, "ATR% Percentile Lookback", minval=50, maxval=500, group=grp_regime)
+atr_excl_pct   = input.float(25, "Exclude Bottom N% Volatility", minval=5, maxval=50, group=grp_regime)
+
+// -- Display --
+grp_vis = "Display"
+show_signals   = input.bool(true, "Show Signal Labels", group=grp_vis)
+show_regime    = input.bool(true, "Show Regime Background", group=grp_vis)
+show_tp_sl     = input.bool(true, "Show TP/SL Lines", group=grp_vis)
+
+// =============================================================================
+// INDICATORS
+// =============================================================================
+
+rsi_val   = ta.rsi(close, rsi_len)
+cci_val   = ta.cci(close, cci_len)
+atr_val   = ta.atr(atr_len)
+atr_pct   = (atr_val / close) * 100
+
+[macd_line, signal_line, macd_hist] = ta.macd(close, 12, 26, 9)
+
+vol_ma    = ta.sma(volume, 20)
+vol_spike = volume > (vol_ma * vol_spike_mult)
+up_candle = close > open
+dn_candle = close < open
+
+[bb_upper, bb_mid, bb_lower] = ta.bb(close, 20, 2.0)
+bb_width  = (bb_upper - bb_lower) / bb_mid * 100
+bb_pos    = (close - bb_lower) / (bb_upper - bb_lower)
+
+ma_20     = ta.sma(close, 20)
+ma_50     = ta.sma(close, 50)
+
+[diplus, diminus, adx_val] = ta.dmi(14, 14)
+
+wpr_val   = ta.wpr(14)
+
+// =============================================================================
+// REGIME FILTER
+// =============================================================================
+
+atr_pct_rank = ta.percentrank(atr_pct, atr_lookback)
+regime_ok = use_regime ? atr_pct_rank > atr_excl_pct : true
+
+bgcolor(show_regime and not regime_ok ? color.new(color.red, 92) : na, title="Low Vol Zone")
+bgcolor(show_regime and regime_ok and atr_pct_rank > 75 ? color.new(color.green, 95) : na, title="High Vol Zone")
+
+// =============================================================================
+// LONG SIGNAL SCORING (5 signals, same as V3)
+// =============================================================================
+
+long_score = 0
+
+// L1: RSI momentum continuation (RSI > 75, p<0.0001)
+sig_l_rsi = rsi_val > rsi_long_thr
+long_score += sig_l_rsi ? 1 : 0
+
+// L2: Volume spike on UP candle (continuation)
+sig_l_vol = vol_spike and up_candle
+long_score += sig_l_vol ? 1 : 0
+
+// L3: CCI oversold bounce (turning up from <-100)
+sig_l_cci = cci_val < cci_long_thr and cci_val > cci_val[1]
+long_score += sig_l_cci ? 1 : 0
+
+// L4: MACD histogram turning positive
+sig_l_macd = macd_hist > 0 and macd_hist[1] < 0
+long_score += sig_l_macd ? 1 : 0
+
+// L5: Trend aligned (close > MA20 > MA50)
+sig_l_trend = close > ma_20 and ma_20 > ma_50
+long_score += sig_l_trend ? 1 : 0
+
+// =============================================================================
+// SHORT SIGNAL SCORING (5 signals, NEW)
+// =============================================================================
+
+short_score = 0
+
+// S1: RSI weak/declining (RSI < 25, continued decline per analysis)
+sig_s_rsi = rsi_val < rsi_short_thr
+short_score += sig_s_rsi ? 1 : 0
+
+// S2: Volume spike on DOWN candle (panic selling → continuation)
+sig_s_vol = vol_spike and dn_candle
+short_score += sig_s_vol ? 1 : 0
+
+// S3: CCI exhaustion top (turning down from >+200)
+sig_s_cci = cci_val > cci_short_thr and cci_val < cci_val[1]
+short_score += sig_s_cci ? 1 : 0
+
+// S4: MACD histogram turning negative
+sig_s_macd = macd_hist < 0 and macd_hist[1] > 0
+short_score += sig_s_macd ? 1 : 0
+
+// S5: Bear trend (close < MA20 < MA50)
+sig_s_trend = close < ma_20 and ma_20 < ma_50
+short_score += sig_s_trend ? 1 : 0
+
+// =============================================================================
+// ENTRY CONDITIONS
+// =============================================================================
+
+long_entry  = long_score >= min_long_score and regime_ok and strategy.position_size == 0
+short_entry = enable_shorts and short_score >= min_short_score and regime_ok and strategy.position_size == 0
+
+// Prevent conflicting signals (prefer higher-score side)
+if long_entry and short_entry
+    if long_score >= short_score
+        short_entry := false
+    else
+        long_entry := false
+
+// =============================================================================
+// POSITION SIZING
+// =============================================================================
+
+long_sl_dist  = long_sl_mult * atr_val
+long_tp_dist  = long_tp_mult * atr_val
+short_sl_dist = short_sl_mult * atr_val
+short_tp_dist = short_tp_mult * atr_val
+
+long_sl_pct  = long_sl_dist / close * 100
+short_sl_pct = short_sl_dist / close * 100
+
+long_pos_pct  = math.min(risk_pct / long_sl_pct * 100, 25)
+short_pos_pct = math.min(risk_pct / short_sl_pct * 100, 25)
+
+// =============================================================================
+// TRADE MANAGEMENT
+// =============================================================================
+
+var float entry_price = na
+var int   entry_bar_idx = na
+var float tp_level = na
+var float sl_level = na
+var string trade_side = ""
+
+// LONG entry
+if long_entry
+    entry_price := close
+    entry_bar_idx := bar_index
+    tp_level := close + long_tp_dist
+    sl_level := close - long_sl_dist
+    trade_side := "LONG"
+    strategy.entry("Long", strategy.long, qty=long_pos_pct)
+    strategy.exit("L-TP/SL", "Long", limit=tp_level, stop=sl_level)
+
+// SHORT entry
+if short_entry
+    entry_price := close
+    entry_bar_idx := bar_index
+    tp_level := close - short_tp_dist
+    sl_level := close + short_sl_dist
+    trade_side := "SHORT"
+    strategy.entry("Short", strategy.short, qty=short_pos_pct)
+    strategy.exit("S-TP/SL", "Short", limit=tp_level, stop=sl_level)
+
+// Timeout exit
+bars_in_trade = strategy.position_size != 0 ? bar_index - entry_bar_idx : 0
+if strategy.position_size > 0 and bars_in_trade >= max_hold_bars
+    strategy.close("Long", comment="L-TIMEOUT")
+if strategy.position_size < 0 and bars_in_trade >= max_hold_bars
+    strategy.close("Short", comment="S-TIMEOUT")
+
+// =============================================================================
+// VISUALIZATION
+// =============================================================================
+
+// Long score (green) and short score (red) as histograms
+plot(long_score, "Long Score", color=long_score >= min_long_score and regime_ok ? color.lime : color.new(color.gray, 60),
+     style=plot.style_columns, display=display.pane)
+plot(-short_score, "Short Score", color=short_score >= min_short_score and regime_ok ? color.red : color.new(color.gray, 60),
+     style=plot.style_columns, display=display.pane)
+
+// TP/SL lines
+plot(show_tp_sl and strategy.position_size != 0 ? tp_level : na, "TP Level",
+     color=color.green, style=plot.style_linebr, linewidth=2)
+plot(show_tp_sl and strategy.position_size != 0 ? sl_level : na, "SL Level",
+     color=color.red, style=plot.style_linebr, linewidth=2)
+
+// Entry signals
+plotshape(show_signals and long_entry, title="Long Signal",
+     location=location.belowbar, style=shape.triangleup,
+     size=size.small, color=color.lime, text="L")
+plotshape(show_signals and short_entry, title="Short Signal",
+     location=location.abovebar, style=shape.triangledown,
+     size=size.small, color=color.red, text="S")
+
+// Score labels on strong signals
+if show_signals and long_entry and long_score >= 3
+    label.new(bar_index, low, "L" + str.tostring(long_score),
+         color=color.new(color.lime, 20), textcolor=color.white,
+         style=label.style_label_up, size=size.small)
+
+if show_signals and short_entry and short_score >= 3
+    label.new(bar_index, high, "S" + str.tostring(short_score),
+         color=color.new(color.red, 20), textcolor=color.white,
+         style=label.style_label_down, size=size.small)
+
+// =============================================================================
+// INFO TABLE
+// =============================================================================
+
+var table info = table.new(position.top_right, 2, 12, bgcolor=color.new(color.black, 80))
+
+if barstate.islast
+    table.cell(info, 0, 0, "Indicator", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 0, "Value", text_color=color.white, text_size=size.small)
+
+    table.cell(info, 0, 1, "RSI", text_color=color.white, text_size=size.small)
+    rsi_c = rsi_val > rsi_long_thr ? color.lime : rsi_val < rsi_short_thr ? color.red : color.gray
+    table.cell(info, 1, 1, str.tostring(rsi_val, "#.0"), text_color=rsi_c, text_size=size.small)
+
+    table.cell(info, 0, 2, "CCI", text_color=color.white, text_size=size.small)
+    cci_c = cci_val < cci_long_thr ? color.orange : cci_val > cci_short_thr ? color.red : color.gray
+    table.cell(info, 1, 2, str.tostring(cci_val, "#.0"), text_color=cci_c, text_size=size.small)
+
+    table.cell(info, 0, 3, "ATR%", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 3, str.tostring(atr_pct, "#.###") + "%", text_color=color.white, text_size=size.small)
+
+    table.cell(info, 0, 4, "Regime", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 4, regime_ok ? "OK" : "LOW VOL",
+         text_color=regime_ok ? color.lime : color.red, text_size=size.small)
+
+    table.cell(info, 0, 5, "Long Score", text_color=color.white, text_size=size.small)
+    l_c = long_score >= min_long_score ? color.lime : color.gray
+    table.cell(info, 1, 5, str.tostring(long_score) + "/5", text_color=l_c, text_size=size.small)
+
+    table.cell(info, 0, 6, "Short Score", text_color=color.white, text_size=size.small)
+    s_c = short_score >= min_short_score ? color.red : color.gray
+    table.cell(info, 1, 6, str.tostring(short_score) + "/5", text_color=s_c, text_size=size.small)
+
+    table.cell(info, 0, 7, "MACD Hist", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 7, str.tostring(macd_hist, "#.0"),
+         text_color=macd_hist > 0 ? color.lime : color.red, text_size=size.small)
+
+    table.cell(info, 0, 8, "BB Pos", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 8, str.tostring(bb_pos, "#.##"), text_color=color.white, text_size=size.small)
+
+    table.cell(info, 0, 9, "Vol Spike", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 9, vol_spike ? "YES" : "no",
+         text_color=vol_spike ? color.yellow : color.gray, text_size=size.small)
+
+    pos_str = strategy.position_size > 0 ? "LONG" : strategy.position_size < 0 ? "SHORT" : "FLAT"
+    pos_c = strategy.position_size > 0 ? color.lime : strategy.position_size < 0 ? color.red : color.gray
+    table.cell(info, 0, 10, "Position", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 10, pos_str, text_color=pos_c, text_size=size.small)
+
+    table.cell(info, 0, 11, "Bars Held", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 11, str.tostring(bars_in_trade), text_color=color.white, text_size=size.small)
+
+// =============================================================================
+// ALERTS
+// =============================================================================
+
+alertcondition(long_entry, title="Long Entry",
+     message="BTC V4: LONG signal (score={{plot_0}}) at {{close}}")
+alertcondition(short_entry, title="Short Entry",
+     message="BTC V4: SHORT signal (score={{plot_1}}) at {{close}}")
+alertcondition(not regime_ok, title="Low Volatility",
+     message="BTC V4: LOW VOLATILITY - avoid new trades")
+alertcondition(long_score >= 4, title="Strong Long (4+)",
+     message="BTC V4: STRONG LONG signal (score>=4) at {{close}}")
+alertcondition(short_score >= 4, title="Strong Short (4+)",
+     message="BTC V4: STRONG SHORT signal (score>=4) at {{close}}")

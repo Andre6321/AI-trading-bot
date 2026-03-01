@@ -24,18 +24,19 @@ OUTPUT_DIR = Path(__file__).parent.parent.parent / "data" / "raw"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def download_from_binance(years=3, timeframe='1h'):
+def download_from_binance(years=3, timeframe='1h', start_date=None):
     """
     Download from Binance (usually has the most history).
     
     Args:
-        years: Number of years of history
+        years: Number of years of history (used if start_date is None)
         timeframe: Timeframe (1h, 4h, 1d)
+        start_date: Fixed start date string like '2020-01-01' (overrides years)
         
     Returns:
         DataFrame with OHLCV data
     """
-    print(f"\n📥 Downloading from Binance ({years} years, {timeframe})...")
+    print(f"\n📥 Downloading from Binance ({start_date or f'{years} years'}, {timeframe})...")
     
     try:
         exchange = ccxt.binance({'enableRateLimit': True})
@@ -43,7 +44,10 @@ def download_from_binance(years=3, timeframe='1h'):
         
         # Calculate start date
         now = datetime.now(timezone.utc)
-        since_dt = now - timedelta(days=365 * years)
+        if start_date:
+            since_dt = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        else:
+            since_dt = now - timedelta(days=365 * years)
         since_ms = int(since_dt.timestamp() * 1000)
         
         print(f"   Fetching from {since_dt.date()} to {now.date()}...")
@@ -100,18 +104,19 @@ def download_from_binance(years=3, timeframe='1h'):
         return None
 
 
-def download_from_yahoo(years=3, interval='1h'):
+def download_from_yahoo(years=3, interval='1h', start_date_str=None):
     """
     Download from Yahoo Finance (BTC-USD).
     
     Args:
-        years: Number of years of history
+        years: Number of years of history (used if start_date_str is None)
         interval: Interval (1h, 1d)
+        start_date_str: Fixed start date string like '2020-01-01'
         
     Returns:
         DataFrame with OHLCV data
     """
-    print(f"\n📥 Downloading from Yahoo Finance ({years} years, {interval})...")
+    print(f"\n📥 Downloading from Yahoo Finance ({start_date_str or f'{years} years'}, {interval})...")
     
     try:
         # Yahoo Finance uses BTC-USD
@@ -119,7 +124,10 @@ def download_from_yahoo(years=3, interval='1h'):
         
         # Calculate start/end dates
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=365 * years)
+        if start_date_str:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        else:
+            start_date = end_date - timedelta(days=365 * years)
         
         print(f"   Fetching from {start_date.date()} to {end_date.date()}...")
         
@@ -220,12 +228,13 @@ def main():
     print("🚀 MULTI-SOURCE DATA DOWNLOADER")
     print("=" * 60)
     
-    YEARS = 5
+    YEARS = 6
     TIMEFRAME = '1h'
+    START_DATE = '2020-01-01'  # Fixed start for full bull+bear cycle coverage
     
     # Download from multiple sources
-    binance_df = download_from_binance(years=YEARS, timeframe=TIMEFRAME)
-    yahoo_df = download_from_yahoo(years=YEARS, interval=TIMEFRAME)
+    binance_df = download_from_binance(years=YEARS, timeframe=TIMEFRAME, start_date=START_DATE)
+    yahoo_df = download_from_yahoo(years=YEARS, interval=TIMEFRAME, start_date_str=START_DATE)
     
     # Merge data
     try:

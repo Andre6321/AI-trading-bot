@@ -1,0 +1,860 @@
+
+==============================================================================================================
+  NASDAQ STRATEGY V2 — ENHANCED BACKTESTER + BUY & HOLD BENCHMARK
+==============================================================================================================
+
+  Date: 2026-02-25 03:43
+
+[1] QQQ daily (10yr)...
+    2515 bars | 2016-02-24 → 2026-02-24
+[2] VIX daily (10yr)...
+    2515 bars
+[3] VIX 3-month futures proxy (VIX3M)...
+    2515 bars
+  Downloads complete.
+
+  Data ready: 2514 trading days
+  Period: 2016-02-25 → 2026-02-24
+  SMA200 valid from: 2016-12-07
+
+==============================================================================================================
+  BUY AND HOLD BENCHMARK — QQQ
+==============================================================================================================
+
+  QQQ: $96.32 → $608.21
+  Period: 10.0 years
+  Total Return: +531.4%
+  CAGR: +20.24%
+  Max Drawdown: 35.1%
+  Sharpe (daily): +0.95
+
+  --- Adjusted for 5% position sizing (like our strategies) ---
+  Total Return on Capital: +26.57%
+  Dollar P&L on $25K: $+6,643
+  Max DD on capital: 1.76%
+
+==============================================================================================================
+  B1. 3+ DOWN DAYS + VIX < 25 — V1 Winner (Baseline)
+==============================================================================================================
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       57.2%
+  Avg Win:        +0.871%    Avg Loss: -0.654%
+  Profit Factor:  1.78
+  Total P&L:      $+380.52 (+1.52%)
+  Max Drawdown:   0.19%
+  Sharpe (ann):   +3.58
+  Calmar Ratio:   0.80
+  Expectancy:     +0.2192% per trade
+  t-stat:         +2.649  p=0.0090 ***
+  Final Equity:   $25,380.52 (from $25,000)
+  vs Buy&Hold:    -0.86% annual alpha
+
+
+==============================================================================================================
+  B2. MON+WED + VIX<20 — V1 Runner-Up (Baseline)
+==============================================================================================================
+
+  Trades:         686 (69/yr over 10.0 yrs)
+  Win Rate:       58.2%
+  Avg Win:        +0.576%    Avg Loss: -0.516%
+  Profit Factor:  1.55
+  Total P&L:      $+1,043.13 (+4.17%)
+  Max Drawdown:   0.29%
+  Sharpe (ann):   +2.61
+  Calmar Ratio:   1.46
+  Expectancy:     +0.1193% per trade
+  t-stat:         +4.310  p=0.0000 ***
+  Final Equity:   $26,043.13 (from $25,000)
+  vs Buy&Hold:    -0.59% annual alpha
+
+
+==============================================================================================================
+  B3. VIX<15 LONG — V1 Third Place (Baseline)
+==============================================================================================================
+
+  Trades:         928 (95/yr over 9.8 yrs)
+  Win Rate:       58.0%
+  Avg Win:        +0.471%    Avg Loss: -0.417%
+  Profit Factor:  1.56
+  Total P&L:      $+1,157.67 (+4.63%)
+  Max Drawdown:   0.34%
+  Sharpe (ann):   +2.58
+  Calmar Ratio:   1.38
+  Expectancy:     +0.0977% per trade
+  t-stat:         +4.942  p=0.0000 ***
+  Final Equity:   $26,157.67 (from $25,000)
+  vs Buy&Hold:    -0.54% annual alpha
+
+
+==============================================================================================================
+  B4. COMBO SCORE ≥ 3 (Baseline)
+==============================================================================================================
+
+  Trades:         422 (42/yr over 9.9 yrs)
+  Win Rate:       56.9%
+  Avg Win:        +0.801%    Avg Loss: -0.696%
+  Profit Factor:  1.52
+  Total P&L:      $+830.43 (+3.32%)
+  Max Drawdown:   0.39%
+  Sharpe (ann):   +2.31
+  Calmar Ratio:   0.86
+  Expectancy:     +0.1552% per trade
+  t-stat:         +2.990  p=0.0030 ***
+  Final Equity:   $25,830.43 (from $25,000)
+  vs Buy&Hold:    -0.68% annual alpha
+
+
+==============================================================================================================
+  E1a. 3+DOWN + VIX<25 + ABOVE SMA200
+==============================================================================================================
+
+  Adds: Only trade when QQQ > 200-day SMA (uptrend confirmation)
+
+  Trades:         109 (12/yr over 9.1 yrs)
+  Win Rate:       56.9%
+  Avg Win:        +0.805%    Avg Loss: -0.665%
+  Profit Factor:  1.60
+  Total P&L:      $+234.34 (+0.94%)
+  Max Drawdown:   0.18%
+  Sharpe (ann):   +3.02
+  Calmar Ratio:   0.56
+  Expectancy:     +0.1714% per trade
+  t-stat:         +1.986  p=0.0495 ** 
+  Final Equity:   $25,234.34 (from $25,000)
+  vs Buy&Hold:    -0.91% annual alpha
+
+
+==============================================================================================================
+  E1b. MON+WED + VIX<20 + ABOVE SMA200
+==============================================================================================================
+
+  Trades:         588 (64/yr over 9.2 yrs)
+  Win Rate:       58.2%
+  Avg Win:        +0.564%    Avg Loss: -0.525%
+  Profit Factor:  1.49
+  Total P&L:      $+810.21 (+3.24%)
+  Max Drawdown:   0.29%
+  Sharpe (ann):   +2.40
+  Calmar Ratio:   1.23
+  Expectancy:     +0.1086% per trade
+  t-stat:         +3.662  p=0.0003 ***
+  Final Equity:   $25,810.21 (from $25,000)
+  vs Buy&Hold:    -0.66% annual alpha
+
+
+==============================================================================================================
+  E1c. VIX<15 + ABOVE SMA200
+==============================================================================================================
+
+  Trades:         798 (88/yr over 9.1 yrs)
+  Win Rate:       57.5%
+  Avg Win:        +0.472%    Avg Loss: -0.420%
+  Profit Factor:  1.52
+  Total P&L:      $+945.05 (+3.78%)
+  Max Drawdown:   0.34%
+  Sharpe (ann):   +2.45
+  Calmar Ratio:   1.22
+  Expectancy:     +0.0931% per trade
+  t-stat:         +4.363  p=0.0000 ***
+  Final Equity:   $25,945.05 (from $25,000)
+  vs Buy&Hold:    -0.60% annual alpha
+
+
+==============================================================================================================
+  E2a. 3+DOWN + VIX<25 + RSI<35
+==============================================================================================================
+
+  Adds: RSI must be oversold (< 35) for stronger bounce signal
+
+  Trades:         24 (3/yr over 8.2 yrs)
+  Win Rate:       50.0%
+  Avg Win:        +0.584%    Avg Loss: -0.651%
+  Profit Factor:  0.90
+  Total P&L:      $-10.15 (-0.04%)
+  Max Drawdown:   0.28%
+  Sharpe (ann):   -0.74
+  Calmar Ratio:   -0.02
+  Expectancy:     -0.0337% per trade
+  t-stat:         -0.227  p=0.8224    
+  Final Equity:   $24,989.85 (from $25,000)
+  vs Buy&Hold:    -1.02% annual alpha
+
+
+==============================================================================================================
+  E2b. 3+DOWN + RSI<40 (relaxed)
+==============================================================================================================
+
+  Trades:         62 (6/yr over 9.5 yrs)
+  Win Rate:       46.8%
+  Avg Win:        +1.045%    Avg Loss: -0.947%
+  Profit Factor:  0.97
+  Total P&L:      $-12.27 (-0.05%)
+  Max Drawdown:   0.39%
+  Sharpe (ann):   -0.18
+  Calmar Ratio:   -0.01
+  Expectancy:     -0.0154% per trade
+  t-stat:         -0.089  p=0.9292    
+  Final Equity:   $24,987.73 (from $25,000)
+  vs Buy&Hold:    -1.02% annual alpha
+
+
+==============================================================================================================
+  E2c. RSI<30 STANDALONE (pure oversold bounce)
+==============================================================================================================
+
+  Buy any time RSI drops below 30
+
+  Trades:         121 (13/yr over 9.6 yrs)
+  Win Rate:       22.3%
+  Avg Win:        +1.116%    Avg Loss: -1.515%
+  Profit Factor:  0.21
+  Total P&L:      $-1,366.03 (-5.46%)
+  Max Drawdown:   5.51%
+  Sharpe (ann):   -9.65
+  Calmar Ratio:   -0.10
+  Expectancy:     -0.9280% per trade
+  t-stat:         -6.687  p=0.0000 ***
+  Final Equity:   $23,633.97 (from $25,000)
+  vs Buy&Hold:    -1.58% annual alpha
+
+
+==============================================================================================================
+  E3. 3+DOWN + VIX<25 + ATR SL/TP
+==============================================================================================================
+
+  SL = 1.5 × ATR below entry | TP = 2.5 × ATR above entry
+  Simulated using daily bars: hit TP if High reaches, SL if Low reaches
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       57.2%
+  Avg Win:        +0.871%    Avg Loss: -0.667%
+  Profit Factor:  1.75
+  Total P&L:      $+370.97 (+1.48%)
+  Max Drawdown:   0.22%
+  Sharpe (ann):   +3.45
+  Calmar Ratio:   0.69
+  Expectancy:     +0.2137% per trade
+  t-stat:         +2.555  p=0.0117 ** 
+  Final Equity:   $25,370.97 (from $25,000)
+  vs Buy&Hold:    -0.86% annual alpha
+
+
+==============================================================================================================
+  E4-2d. 3+DOWN + VIX<25 + HOLD 2 DAYS
+==============================================================================================================
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       58.0%
+  Avg Win:        +1.534%    Avg Loss: -1.686%
+  Profit Factor:  1.25
+  Total P&L:      $+311.55 (+1.25%)
+  Max Drawdown:   1.26%
+  Sharpe (ann):   +1.44
+  Calmar Ratio:   0.10
+  Expectancy:     +0.1805% per trade
+  t-stat:         +1.069  p=0.2868    
+  Final Equity:   $25,311.55 (from $25,000)
+  vs Buy&Hold:    -0.89% annual alpha
+
+
+==============================================================================================================
+  E4-3d. 3+DOWN + VIX<25 + HOLD 3 DAYS
+==============================================================================================================
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       58.7%
+  Avg Win:        +1.661%    Avg Loss: -2.119%
+  Profit Factor:  1.11
+  Total P&L:      $+170.00 (+0.68%)
+  Max Drawdown:   1.32%
+  Sharpe (ann):   +0.68
+  Calmar Ratio:   0.05
+  Expectancy:     +0.0996% per trade
+  t-stat:         +0.502  p=0.6165    
+  Final Equity:   $25,170.00 (from $25,000)
+  vs Buy&Hold:    -0.94% annual alpha
+
+
+==============================================================================================================
+  E4-5d. 3+DOWN + VIX<25 + HOLD 5 DAYS
+==============================================================================================================
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       54.3%
+  Avg Win:        +2.113%    Avg Loss: -2.513%
+  Profit Factor:  1.00
+  Total P&L:      $-2.11 (-0.01%)
+  Max Drawdown:   1.64%
+  Sharpe (ann):   +0.01
+  Calmar Ratio:   -0.00
+  Expectancy:     +0.0010% per trade
+  t-stat:         +0.004  p=0.9968    
+  Final Equity:   $24,997.89 (from $25,000)
+  vs Buy&Hold:    -1.01% annual alpha
+
+
+==============================================================================================================
+  E5. 3+DOWN + VIX<25 + KELLY SIZING
+==============================================================================================================
+
+  Uses rolling Kelly estimate to scale position from 2% to 10%
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       57.2%
+  Avg Win:        +0.871%    Avg Loss: -0.654%
+  Profit Factor:  1.75
+  Total P&L:      $+1,030.38 (+4.12%)
+  Max Drawdown:   0.54%
+  Sharpe (ann):   +3.58
+  Calmar Ratio:   0.78
+  Expectancy:     +0.2192% per trade
+  t-stat:         +2.649  p=0.0090 ***
+  Final Equity:   $26,030.38 (from $25,000)
+  vs Buy&Hold:    -0.59% annual alpha
+
+
+==============================================================================================================
+  E6. DEPTH-WEIGHTED MEAN REVERSION
+==============================================================================================================
+
+  3+ down days, position size scales with cumulative drop depth
+  Drop >= 5%: 10% size | Drop 3-5%: 7% | Drop < 3%: 4%
+
+  Trades:         176 (18/yr over 9.8 yrs)
+  Win Rate:       54.5%
+  Avg Win:        +1.137%    Avg Loss: -0.801%
+  Profit Factor:  1.90
+  Total P&L:      $+957.90 (+3.83%)
+  Max Drawdown:   0.48%
+  Sharpe (ann):   +2.98
+  Calmar Ratio:   0.81
+  Expectancy:     +0.2562% per trade
+  t-stat:         +2.492  p=0.0136 ** 
+  Final Equity:   $25,957.90 (from $25,000)
+  vs Buy&Hold:    -0.62% annual alpha
+
+
+==============================================================================================================
+  E6b. DEPTH-WEIGHTED + VIX<25
+==============================================================================================================
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       57.2%
+  Avg Win:        +0.871%    Avg Loss: -0.654%
+  Profit Factor:  2.09
+  Total P&L:      $+535.68 (+2.14%)
+  Max Drawdown:   0.19%
+  Sharpe (ann):   +3.58
+  Calmar Ratio:   1.16
+  Expectancy:     +0.2192% per trade
+  t-stat:         +2.649  p=0.0090 ***
+  Final Equity:   $25,535.68 (from $25,000)
+  vs Buy&Hold:    -0.79% annual alpha
+
+
+==============================================================================================================
+  E7a. MON+WED + VIX<20 + BEST MONTHS (Nov-Apr)
+==============================================================================================================
+
+  Adds: Seasonal filter — only trade during Nov–Apr
+
+  Trades:         321 (32/yr over 10.0 yrs)
+  Win Rate:       56.4%
+  Avg Win:        +0.652%    Avg Loss: -0.535%
+  Profit Factor:  1.57
+  Total P&L:      $+544.65 (+2.18%)
+  Max Drawdown:   0.28%
+  Sharpe (ann):   +2.72
+  Calmar Ratio:   0.78
+  Expectancy:     +0.1344% per trade
+  t-stat:         +3.074  p=0.0023 ***
+  Final Equity:   $25,544.65 (from $25,000)
+  vs Buy&Hold:    -0.79% annual alpha
+
+
+==============================================================================================================
+  E7b. VIX<15 + BEST MONTHS (Nov-Apr)
+==============================================================================================================
+
+  Trades:         445 (45/yr over 9.8 yrs)
+  Win Rate:       56.0%
+  Avg Win:        +0.482%    Avg Loss: -0.372%
+  Profit Factor:  1.64
+  Total P&L:      $+594.09 (+2.38%)
+  Max Drawdown:   0.20%
+  Sharpe (ann):   +2.92
+  Calmar Ratio:   1.20
+  Expectancy:     +0.1056% per trade
+  t-stat:         +3.876  p=0.0001 ***
+  Final Equity:   $25,594.09 (from $25,000)
+  vs Buy&Hold:    -0.77% annual alpha
+
+
+==============================================================================================================
+  E8. COMBINED PORTFOLIO — All Top Edges Stacked
+==============================================================================================================
+
+  Runs B1 + B2 + B3 as a portfolio with 3% each for diversification
+  Each strategy fires independently, multiple can trigger same day
+
+  Trades:         1,752 (176/yr over 10.0 yrs)
+  Win Rate:       58.0%
+  Avg Win:        +0.543%    Avg Loss: -0.474%
+  Profit Factor:  1.58
+  Total P&L:      $+1,327.10 (+5.31%)
+  Max Drawdown:   0.21%
+  Sharpe (ann):   +2.67
+  Calmar Ratio:   2.60
+  Expectancy:     +0.1157% per trade
+  t-stat:         +7.047  p=0.0000 ***
+  Final Equity:   $26,327.10 (from $25,000)
+  vs Buy&Hold:    -0.48% annual alpha
+
+
+==============================================================================================================
+  E9. HIGH-CONVICTION SCALING — Size Up on Signal Agreement
+==============================================================================================================
+
+  Score-based sizing: more edges = bigger position (3-12% equity)
+  +2 for 3+down, +1 Mon/Wed, +1 VIX<20, +1 RSI<40, +1 above SMA200
+  Size = score * 2%, capped at 12%
+
+  Trades:         1,263 (127/yr over 10.0 yrs)
+  Win Rate:       55.7%
+  Avg Win:        +0.716%    Avg Loss: -0.729%
+  Profit Factor:  1.22
+  Total P&L:      $+1,662.53 (+6.65%)
+  Max Drawdown:   1.05%
+  Sharpe (ann):   +1.18
+  Calmar Ratio:   0.64
+  Expectancy:     +0.0753% per trade
+  t-stat:         +2.652  p=0.0081 ***
+  Final Equity:   $26,662.53 (from $25,000)
+  vs Buy&Hold:    -0.34% annual alpha
+
+
+==============================================================================================================
+  E10. 3+DOWN + VIX<25 + TRAILING STOP (up to 5 days)
+==============================================================================================================
+
+  Hold up to 5 days. Trail stop at entry price (lock in breakeven).
+  Also trail at 50% of max profit.
+
+  Trades:         138 (14/yr over 9.8 yrs)
+  Win Rate:       95.7%
+  Avg Win:        +0.678%    Avg Loss: -0.175%
+  Profit Factor:  86.86
+  Total P&L:      $+1,130.35 (+4.52%)
+  Max Drawdown:   0.05%
+  Sharpe (ann):   +15.99
+  Calmar Ratio:   8.93
+  Expectancy:     +0.6411% per trade
+  t-stat:         +11.832  p=0.0000 ***
+  Final Equity:   $26,130.35 (from $25,000)
+  vs Buy&Hold:    -0.55% annual alpha
+
+
+==============================================================================================================
+  E11a. 3+DOWN + VIX CONTANGO
+==============================================================================================================
+
+  VIX contango (VIX < VIX3M) = market calm, mean reversion works better
+
+  Trades:         150 (15/yr over 9.7 yrs)
+  Win Rate:       55.3%
+  Avg Win:        +0.942%    Avg Loss: -0.733%
+  Profit Factor:  1.59
+  Total P&L:      $+365.25 (+1.46%)
+  Max Drawdown:   0.28%
+  Sharpe (ann):   +2.90
+  Calmar Ratio:   0.53
+  Expectancy:     +0.1937% per trade
+  t-stat:         +2.234  p=0.0270 ** 
+  Final Equity:   $25,365.25 (from $25,000)
+  vs Buy&Hold:    -0.86% annual alpha
+
+
+==============================================================================================================
+  E11b. MON+WED + VIX CONTANGO
+==============================================================================================================
+
+  Trades:         904 (91/yr over 10.0 yrs)
+  Win Rate:       57.1%
+  Avg Win:        +0.684%    Avg Loss: -0.659%
+  Profit Factor:  1.38
+  Total P&L:      $+1,244.48 (+4.98%)
+  Max Drawdown:   0.59%
+  Sharpe (ann):   +1.88
+  Calmar Ratio:   0.84
+  Expectancy:     +0.1077% per trade
+  t-stat:         +3.565  p=0.0004 ***
+  Final Equity:   $26,244.48 (from $25,000)
+  vs Buy&Hold:    -0.51% annual alpha
+
+
+==============================================================================================================
+  E12. COMBO + DRAWDOWN THROTTLE
+==============================================================================================================
+
+  Base 5% size, reduce to 2% when strategy is in 0.3%+ drawdown
+  Protects against regime shifts
+
+  Trades:         422 (42/yr over 9.9 yrs)
+  Win Rate:       56.9%
+  Avg Win:        +0.801%    Avg Loss: -0.696%
+  Profit Factor:  1.48
+  Total P&L:      $+763.93 (+3.06%)
+  Max Drawdown:   0.39%
+  Sharpe (ann):   +2.31
+  Calmar Ratio:   0.79
+  Expectancy:     +0.1552% per trade
+  t-stat:         +2.990  p=0.0030 ***
+  Final Equity:   $25,763.93 (from $25,000)
+  vs Buy&Hold:    -0.70% annual alpha
+
+
+==============================================================================================================
+  E13. ULTIMATE COMBO — All Filters Stacked
+==============================================================================================================
+
+  3+down + VIX<25 + SMA200 + RSI<45 + depth sizing
+  Maximum conviction trades only
+
+  Trades:         43 (5/yr over 8.5 yrs)
+  Win Rate:       48.8%
+  Avg Win:        +0.632%    Avg Loss: -0.692%
+  Profit Factor:  1.09
+  Total P&L:      $+19.29 (+0.08%)
+  Max Drawdown:   0.31%
+  Sharpe (ann):   -0.88
+  Calmar Ratio:   0.03
+  Expectancy:     -0.0458% per trade
+  t-stat:         -0.365  p=0.7172    
+  Final Equity:   $25,019.29 (from $25,000)
+  vs Buy&Hold:    -1.00% annual alpha
+
+
+==============================================================================================================
+  E14a. 3+DOWN + VIX<25 + GOLDEN CROSS (SMA50>SMA200)
+==============================================================================================================
+
+  Trades:         109 (12/yr over 9.1 yrs)
+  Win Rate:       56.0%
+  Avg Win:        +0.787%    Avg Loss: -0.669%
+  Profit Factor:  1.49
+  Total P&L:      $+199.20 (+0.80%)
+  Max Drawdown:   0.20%
+  Sharpe (ann):   +2.60
+  Calmar Ratio:   0.45
+  Expectancy:     +0.1458% per trade
+  t-stat:         +1.711  p=0.0899 *  
+  Final Equity:   $25,199.20 (from $25,000)
+  vs Buy&Hold:    -0.92% annual alpha
+
+
+==============================================================================================================
+  E14b. MON+WED + VIX<20 + GOLDEN CROSS
+==============================================================================================================
+
+  Trades:         568 (62/yr over 9.2 yrs)
+  Win Rate:       57.7%
+  Avg Win:        +0.564%    Avg Loss: -0.531%
+  Profit Factor:  1.45
+  Total P&L:      $+728.79 (+2.92%)
+  Max Drawdown:   0.29%
+  Sharpe (ann):   +2.22
+  Calmar Ratio:   1.11
+  Expectancy:     +0.1013% per trade
+  t-stat:         +3.333  p=0.0009 ***
+  Final Equity:   $25,728.79 (from $25,000)
+  vs Buy&Hold:    -0.70% annual alpha
+
+
+==============================================================================================================
+  E15. 3+DOWN BOUNCE → OVERNIGHT HOLD
+==============================================================================================================
+
+  If 3+ down days trigger fires AND bounce day closes UP,
+  hold overnight to capture continuation gap-up
+
+  Trades:         80 (8/yr over 9.8 yrs)
+  Win Rate:       45.0%
+  Avg Win:        +0.473%    Avg Loss: -0.586%
+  Profit Factor:  0.66
+  Total P&L:      $-109.00 (-0.44%)
+  Max Drawdown:   0.62%
+  Sharpe (ann):   -2.53
+  Calmar Ratio:   -0.07
+  Expectancy:     -0.1091% per trade
+  t-stat:         -1.428  p=0.1572    
+  Final Equity:   $24,891.00 (from $25,000)
+  vs Buy&Hold:    -1.06% annual alpha
+
+
+==============================================================================================================
+  E16. 3+DOWN + VIX<25 + SMA200 + HOLD 2 DAYS
+==============================================================================================================
+
+  Combine trend filter with extended hold for larger gains
+
+  Trades:         109 (12/yr over 9.1 yrs)
+  Win Rate:       56.9%
+  Avg Win:        +1.209%    Avg Loss: -1.271%
+  Profit Factor:  1.25
+  Total P&L:      $+189.59 (+0.76%)
+  Max Drawdown:   1.10%
+  Sharpe (ann):   +1.42
+  Calmar Ratio:   0.08
+  Expectancy:     +0.1392% per trade
+  t-stat:         +0.935  p=0.3518    
+  Final Equity:   $25,189.59 (from $25,000)
+  vs Buy&Hold:    -0.93% annual alpha
+
+
+==============================================================================================================
+  E17. AGGRESSIVE PORTFOLIO — Every Edge, Conviction-Sized
+==============================================================================================================
+
+  Runs ALL profitable signals simultaneously, sizes by conviction:
+  3+down+VIX<25: 5% | Mon+Wed+VIX<20: 3% | VIX<15: 2%
+  Bonus +2% if SMA200 bullish, +1% if RSI<40
+
+  Trades:         1,752 (176/yr over 10.0 yrs)
+  Win Rate:       58.0%
+  Avg Win:        +0.543%    Avg Loss: -0.474%
+  Profit Factor:  1.58
+  Total P&L:      $+1,757.73 (+7.03%)
+  Max Drawdown:   0.34%
+  Sharpe (ann):   +2.67
+  Calmar Ratio:   2.05
+  Expectancy:     +0.1157% per trade
+  t-stat:         +7.047  p=0.0000 ***
+  Final Equity:   $26,757.73 (from $25,000)
+  vs Buy&Hold:    -0.31% annual alpha
+
+
+==============================================================================================================
+  E18. FRIDAY→MONDAY HOLD (Weekend Effect)
+==============================================================================================================
+
+  Buy Friday at close, sell Monday at close (capture weekend gap + Monday)
+
+  Trades:         453 (46/yr over 9.9 yrs)
+  Win Rate:       60.7%
+  Avg Win:        +0.902%    Avg Loss: -1.083%
+  Profit Factor:  1.29
+  Total P&L:      $+696.95 (+2.79%)
+  Max Drawdown:   1.29%
+  Sharpe (ann):   +1.33
+  Calmar Ratio:   0.22
+  Expectancy:     +0.1219% per trade
+  t-stat:         +1.786  p=0.0747 *  
+  Final Equity:   $25,696.95 (from $25,000)
+  vs Buy&Hold:    -0.73% annual alpha
+
+
+==============================================================================================================
+  E19. VIX SPIKE FADE — Buy QQQ when VIX jumps > 2pts in a day
+==============================================================================================================
+
+  When VIX spikes, fear is overdone → buy QQQ next day
+
+  Trades:         189 (19/yr over 9.9 yrs)
+  Win Rate:       9.5%
+  Avg Win:        +0.930%    Avg Loss: -1.722%
+  Profit Factor:  0.06
+  Total P&L:      $-3,242.38 (-12.97%)
+  Max Drawdown:   12.97%
+  Sharpe (ann):   -17.95
+  Calmar Ratio:   -0.10
+  Expectancy:     -1.4690% per trade
+  t-stat:         -15.541  p=0.0000 ***
+  Final Equity:   $21,757.62 (from $25,000)
+  vs Buy&Hold:    -2.33% annual alpha
+
+
+==============================================================================================================
+  E20a. 4+ DOWN DAYS (more extreme streak)
+==============================================================================================================
+
+  Trades:         63 (7/yr over 9.7 yrs)
+  Win Rate:       49.2%
+  Avg Win:        +1.295%    Avg Loss: -0.729%
+  Profit Factor:  1.72
+  Total P&L:      $+210.78 (+0.84%)
+  Max Drawdown:   0.28%
+  Sharpe (ann):   +2.69
+  Calmar Ratio:   0.31
+  Expectancy:     +0.2672% per trade
+  t-stat:         +1.345  p=0.1836    
+  Final Equity:   $25,210.78 (from $25,000)
+  vs Buy&Hold:    -0.92% annual alpha
+
+
+==============================================================================================================
+  E20b. 4+ DOWN DAYS + VIX<30
+==============================================================================================================
+
+  Trades:         53 (5/yr over 9.7 yrs)
+  Win Rate:       50.9%
+  Avg Win:        +0.816%    Avg Loss: -0.640%
+  Profit Factor:  1.32
+  Total P&L:      $+67.45 (+0.27%)
+  Max Drawdown:   0.46%
+  Sharpe (ann):   +1.79
+  Calmar Ratio:   0.06
+  Expectancy:     +0.1019% per trade
+  t-stat:         +0.822  p=0.4148    
+  Final Equity:   $25,067.45 (from $25,000)
+  vs Buy&Hold:    -0.98% annual alpha
+
+
+==============================================================================================================
+  E20c. 4+ DOWN DAYS + VIX<30 + HOLD 2 DAYS
+==============================================================================================================
+
+  Trades:         53 (5/yr over 9.7 yrs)
+  Win Rate:       50.9%
+  Avg Win:        +1.235%    Avg Loss: -1.416%
+  Profit Factor:  0.90
+  Total P&L:      $-43.60 (-0.17%)
+  Max Drawdown:   0.85%
+  Sharpe (ann):   -0.61
+  Calmar Ratio:   -0.02
+  Expectancy:     -0.0652% per trade
+  t-stat:         -0.280  p=0.7803    
+  Final Equity:   $24,956.40 (from $25,000)
+  vs Buy&Hold:    -1.03% annual alpha
+
+
+==============================================================================================================
+  FINAL RESULTS — ALL STRATEGIES vs BUY & HOLD
+==============================================================================================================
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ BUY & HOLD BENCHMARK (QQQ, 10.0yr)                                                                                          │
+  │   Total Return: +531.4%   CAGR: +20.2%   MaxDD: 35.1%   Sharpe: +0.95                                              │
+  │   On $25K with 5% sizing: $+6,643 P&L   DD: 1.76%                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Rank  Strategy                                  PF   WR%  Sharpe  Calmar Trades       P&L$    DD%   p-val Sig  α vs B&H
+  ────  ────────────────────────────────────── ───── ───── ─────── ─────── ────── ────────── ────── ─────── ─── ─────────
+     1  E10: 3+down+VIX<25+trail 5d            86.86  95.7  +15.99    8.93    138     +1,130  0.05%  0.0000 ***    -0.55%
+     2  E6b: Depth+VIX<25                       2.09  57.2   +3.58    1.16    138       +536  0.19%  0.0090 ***    -0.79%
+     3  E6: Depth-weighted reversion            1.90  54.5   +2.98    0.81    176       +958  0.48%  0.0136 **     -0.62%
+     4  B1: 3+down+VIX<25 (baseline)            1.78  57.2   +3.58    0.80    138       +381  0.19%  0.0090 ***    -0.86%
+     5  E5: 3+down+VIX<25+Kelly                 1.75  57.2   +3.58    0.78    138     +1,030  0.54%  0.0090 ***    -0.59%
+     6  E3: 3+down+VIX<25+ATR SL/TP             1.75  57.2   +3.45    0.69    138       +371  0.22%  0.0117 **     -0.86%
+     7  E20a: 4+ down days                      1.72  49.2   +2.69    0.31     63       +211  0.28%  0.1836        -0.92%
+     8  E7b: VIX<15+NovApr                      1.64  56.0   +2.92    1.20    445       +594  0.20%  0.0001 ***    -0.77%
+     9  E1a: 3+down+VIX<25+SMA200               1.60  56.9   +3.02    0.56    109       +234  0.18%  0.0495 **     -0.91%
+    10  E11a: 3+down+VIX contango               1.59  55.3   +2.90    0.53    150       +365  0.28%  0.0270 **     -0.86%
+    11  E8: Portfolio (B1+B2+B3)                1.58  58.0   +2.67    2.60   1752     +1,327  0.21%  0.0000 ***    -0.48%
+    12  E17: Aggressive portfolio               1.58  58.0   +2.67    2.05   1752     +1,758  0.34%  0.0000 ***    -0.31%
+    13  E7a: Mon+Wed+VIX<20+NovApr              1.57  56.4   +2.72    0.78    321       +545  0.28%  0.0023 ***    -0.79%
+    14  B3: VIX<15 long (baseline)              1.56  58.0   +2.58    1.38    928     +1,158  0.34%  0.0000 ***    -0.54%
+    15  B2: Mon+Wed+VIX<20 (baseline)           1.55  58.2   +2.61    1.46    686     +1,043  0.29%  0.0000 ***    -0.59%
+    16  E1c: VIX<15+SMA200                      1.52  57.5   +2.45    1.22    798       +945  0.34%  0.0000 ***    -0.60%
+    17  B4: Combo score>=3 (baseline)           1.52  56.9   +2.31    0.86    422       +830  0.39%  0.0030 ***    -0.68%
+    18  E1b: Mon+Wed+VIX<20+SMA200              1.49  58.2   +2.40    1.23    588       +810  0.29%  0.0003 ***    -0.66%
+    19  E14a: 3+down+VIX+GoldenX                1.49  56.0   +2.60    0.45    109       +199  0.20%  0.0899 *      -0.92%
+    20  E12: Combo+DD throttle                  1.48  56.9   +2.31    0.79    422       +764  0.39%  0.0030 ***    -0.70%
+    21  E14b: Mon+Wed+VIX+GoldenX               1.45  57.7   +2.22    1.11    568       +729  0.29%  0.0009 ***    -0.70%
+    22  E11b: Mon+Wed+contango                  1.38  57.1   +1.88    0.84    904     +1,244  0.59%  0.0004 ***    -0.51%
+    23  E20b: 4+down+VIX<30                     1.32  50.9   +1.79    0.06     53        +67  0.46%  0.4148        -0.98%
+    24  E18: Fri→Mon hold                       1.29  60.7   +1.33    0.22    453       +697  1.29%  0.0747 *      -0.73%
+    25  E4: 3+down+VIX<25 hold 2d               1.25  58.0   +1.44    0.10    138       +312  1.26%  0.2868        -0.89%
+    26  E16: 3+down+VIX+SMA200 2d               1.25  56.9   +1.42    0.08    109       +190  1.10%  0.3518        -0.93%
+    27  E9: Conviction scaling                  1.22  55.7   +1.18    0.64   1263     +1,663  1.05%  0.0081 ***    -0.34%
+    28  E4: 3+down+VIX<25 hold 3d               1.11  58.7   +0.68    0.05    138       +170  1.32%  0.6165        -0.94%
+    29  E13: Ultimate combo                     1.09  48.8   -0.88    0.03     43        +19  0.31%  0.7172        -1.00%
+    30  E4: 3+down+VIX<25 hold 5d               1.00  54.3   +0.01   -0.00    138         -2  1.64%  0.9968        -1.01%
+    31  E2b: 3+down+RSI<40                      0.97  46.8   -0.18   -0.01     62        -12  0.39%  0.9292        -1.02%
+    32  E20c: 4+down+VIX<30 2d                  0.90  50.9   -0.61   -0.02     53        -44  0.85%  0.7803        -1.03%
+    33  E2a: 3+down+VIX<25+RSI<35               0.90  50.0   -0.74   -0.02     24        -10  0.28%  0.8224        -1.02%
+    34  E15: 3+down bounce→overnight            0.66  45.0   -2.53   -0.07     80       -109  0.62%  0.1572        -1.06%
+    35  E2c: RSI<30 bounce                      0.21  22.3   -9.65   -0.10    121     -1,366  5.51%  0.0000 ***    -1.58%
+    36  E19: VIX spike fade                     0.06   9.5  -17.95   -0.10    189     -3,242 12.97%  0.0000 ***    -2.33%
+
+
+  ================================================================================
+  STRATEGIES THAT BEAT BUY & HOLD (risk-adjusted)
+  ================================================================================
+
+  Buy & Hold Sharpe: +0.95 (unadjusted for position size)
+  Buy & Hold CAGR:   +20.24% (full investment)
+
+  Strategies with Sharpe ABOVE buy-and-hold (+0.95):
+    ✅ E10: 3+down+VIX<25+trail 5d            Sharpe=+15.99 (+15.04) PF=86.86 ***
+    ✅ E6b: Depth+VIX<25                      Sharpe=+3.58 (+2.63) PF=2.09 ***
+    ✅ E6: Depth-weighted reversion           Sharpe=+2.98 (+2.03) PF=1.90 ** 
+    ✅ B1: 3+down+VIX<25 (baseline)           Sharpe=+3.58 (+2.63) PF=1.78 ***
+    ✅ E5: 3+down+VIX<25+Kelly                Sharpe=+3.58 (+2.63) PF=1.75 ***
+    ✅ E3: 3+down+VIX<25+ATR SL/TP            Sharpe=+3.45 (+2.50) PF=1.75 ** 
+    ✅ E20a: 4+ down days                     Sharpe=+2.69 (+1.74) PF=1.72    
+    ✅ E7b: VIX<15+NovApr                     Sharpe=+2.92 (+1.97) PF=1.64 ***
+    ✅ E1a: 3+down+VIX<25+SMA200              Sharpe=+3.02 (+2.07) PF=1.60 ** 
+    ✅ E11a: 3+down+VIX contango              Sharpe=+2.90 (+1.95) PF=1.59 ** 
+    ✅ E8: Portfolio (B1+B2+B3)               Sharpe=+2.67 (+1.72) PF=1.58 ***
+    ✅ E17: Aggressive portfolio              Sharpe=+2.67 (+1.72) PF=1.58 ***
+    ✅ E7a: Mon+Wed+VIX<20+NovApr             Sharpe=+2.72 (+1.78) PF=1.57 ***
+    ✅ B3: VIX<15 long (baseline)             Sharpe=+2.58 (+1.63) PF=1.56 ***
+    ✅ B2: Mon+Wed+VIX<20 (baseline)          Sharpe=+2.61 (+1.66) PF=1.55 ***
+    ✅ E1c: VIX<15+SMA200                     Sharpe=+2.45 (+1.50) PF=1.52 ***
+    ✅ B4: Combo score>=3 (baseline)          Sharpe=+2.31 (+1.36) PF=1.52 ***
+    ✅ E1b: Mon+Wed+VIX<20+SMA200             Sharpe=+2.40 (+1.45) PF=1.49 ***
+    ✅ E14a: 3+down+VIX+GoldenX               Sharpe=+2.60 (+1.65) PF=1.49 *  
+    ✅ E12: Combo+DD throttle                 Sharpe=+2.31 (+1.36) PF=1.48 ***
+    ✅ E14b: Mon+Wed+VIX+GoldenX              Sharpe=+2.22 (+1.27) PF=1.45 ***
+    ✅ E11b: Mon+Wed+contango                 Sharpe=+1.88 (+0.93) PF=1.38 ***
+    ✅ E20b: 4+down+VIX<30                    Sharpe=+1.79 (+0.84) PF=1.32    
+    ✅ E18: Fri→Mon hold                      Sharpe=+1.33 (+0.38) PF=1.29 *  
+    ✅ E4: 3+down+VIX<25 hold 2d              Sharpe=+1.44 (+0.50) PF=1.25    
+    ✅ E16: 3+down+VIX+SMA200 2d              Sharpe=+1.42 (+0.47) PF=1.25    
+    ✅ E9: Conviction scaling                 Sharpe=+1.18 (+0.24) PF=1.22 ***
+
+  Strategies with better risk/reward than B&H:
+  (Buy & Hold Calmar ≈ 0.576)
+    ✅ E10: 3+down+VIX<25+trail 5d            Calmar=8.93 vs B&H 0.576
+    ✅ E6b: Depth+VIX<25                      Calmar=1.16 vs B&H 0.576
+    ✅ E6: Depth-weighted reversion           Calmar=0.81 vs B&H 0.576
+    ✅ B1: 3+down+VIX<25 (baseline)           Calmar=0.80 vs B&H 0.576
+    ✅ E5: 3+down+VIX<25+Kelly                Calmar=0.78 vs B&H 0.576
+    ✅ E3: 3+down+VIX<25+ATR SL/TP            Calmar=0.69 vs B&H 0.576
+    ✅ E7b: VIX<15+NovApr                     Calmar=1.20 vs B&H 0.576
+    ✅ E8: Portfolio (B1+B2+B3)               Calmar=2.60 vs B&H 0.576
+    ✅ E17: Aggressive portfolio              Calmar=2.05 vs B&H 0.576
+    ✅ E7a: Mon+Wed+VIX<20+NovApr             Calmar=0.78 vs B&H 0.576
+
+
+  ================================================================================
+  KEY INSIGHTS
+  ================================================================================
+
+  1. BUY & HOLD CONTEXT:
+     QQQ returned +531% over 10 years (+20.2% CAGR)
+     BUT suffered a 35% max drawdown
+     Sharpe: 0.95 (decent but not great)
+
+  2. OUR STRATEGIES vs B&H:
+     Our strategies use only 5% position sizing = MUCH less capital at risk
+     Key advantage: RISK-ADJUSTED returns (Sharpe, Calmar)
+
+  3. BEST STRATEGY: E10: 3+down+VIX<25+trail 5d
+     PF=86.86 Sharpe=+15.99 MaxDD=0.05%
+     On $25K: $+1,130 (+4.5%)
+     ✅ BEATS buy-and-hold on Sharpe (+15.99 vs +0.95)
+     ✅ MUCH lower drawdown (0.05% vs 1.76% adjusted)
+
+  4. IMPROVEMENT vs V1 BASELINE:
+     Best baseline: B1: 3+down+VIX<25 (baseline) PF=1.78
+     Best enhanced: E10: 3+down+VIX<25+trail 5d PF=86.86
+     PF improvement: +4769.2%
+     P&L improvement: $+750
+
+  Results saved to:
+    outputs/nasdaq_v2_results.txt
+    outputs/nasdaq_v2_results.json
+
+  Analysis complete at 2026-02-25 03:43:55

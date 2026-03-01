@@ -202,9 +202,9 @@ def add_market_structure_features(df: pd.DataFrame) -> pd.DataFrame:
     
     print("   Adding market structure features...")
     
-    # Higher highs / Lower lows detection
-    df['swing_high'] = df['high'].rolling(5, center=True).max() == df['high']
-    df['swing_low'] = df['low'].rolling(5, center=True).min() == df['low']
+    # Higher highs / Lower lows detection (NO center=True to avoid look-ahead)
+    df['swing_high'] = (df['high'].rolling(5).max() == df['high']).astype(int)
+    df['swing_low'] = (df['low'].rolling(5).min() == df['low']).astype(int)
     
     # Distance from recent high/low
     df['distance_from_high'] = (df['close'] - df['high'].rolling(50).max()) / df['high'].rolling(50).max()
@@ -218,9 +218,12 @@ def add_market_structure_features(df: pd.DataFrame) -> pd.DataFrame:
     # Doji detection (small body, long shadows)
     df['is_doji'] = (df['body_size'] < 0.001).astype(int)
     
-    # Support/Resistance zones (price clustering)
-    df['price_level'] = (df['close'] // 1000) * 1000  # Round to nearest 1000
-    df['level_touches'] = df.groupby('price_level')['close'].transform('count')
+    # Support/Resistance zones - ROLLING count to avoid look-ahead
+    df['price_level'] = (df['close'] // 1000) * 1000
+    # Count touches in a backward-looking window only (no future data)
+    df['level_touches'] = df['price_level'].rolling(window=200, min_periods=1).apply(
+        lambda x: (x == x.iloc[-1]).sum(), raw=False
+    )
     
     return df
 

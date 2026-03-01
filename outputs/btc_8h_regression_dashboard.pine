@@ -1,0 +1,321 @@
+// =============================================================================
+// BTC 8H Regression Model — Signal Dashboard
+// =============================================================================
+//
+// This indicator replicates the TOP features from the ML regression model
+// that predicts BTC's 8-hour forward return. The actual model uses 117
+// features with XGBoost + LightGBM, which can't run natively in Pine Script.
+//
+// WHAT THIS DOES:
+//   Shows the key indicators the model relies on most (by feature importance):
+//   1. Hurst Exponent (trending vs mean-reverting)
+//   2. Return Entropy (predictability)
+//   3. Autocorrelation (momentum persistence)
+//   4. Funding Rate signals (crowd positioning)
+//   5. Garman-Klass Volatility (efficient vol estimate)
+//   6. ATR Regime Filter (skip low-vol periods)
+//
+// HOW TO TRADE:
+//   Use this as a VISUAL CONFIRMATION alongside the Python signal generator.
+//   Run: python scripts/generate_signals.py --loop 60
+//   The Python bot generates the actual BUY/SELL signals.
+//   This Pine Script shows you WHY the model is bullish or bearish.
+//
+// BEST STRATEGY PARAMETERS (from V6 backtest):
+//   - Signal: Top 5% strongest predictions only
+//   - Direction: Both long and short
+//   - Stop Loss: 1.5 × ATR(14) from entry
+//   - Take Profit: 3.0 × ATR(14) from entry
+//   - Trailing Stop: 0.75 × ATR(14) (update only in your favor)
+//   - Max Hold: 12 bars (12 hours on 1H chart)
+//   - Fee Tier: VIP required (0.02% maker)
+//
+// =============================================================================
+
+//@version=6
+indicator("BTC 8H Regression Dashboard", overlay=false, precision=4)
+
+// ─── INPUTS ─────────────────────────────────────────────────────────────────
+grp_sig    = "Signal Settings"
+sl_mult    = input.float(1.5, "Stop Loss (ATR mult)", step=0.1, group=grp_sig)
+tp_mult    = input.float(3.0, "Take Profit (ATR mult)", step=0.1, group=grp_sig)
+trail_mult = input.float(0.75, "Trailing Stop (ATR mult)", step=0.05, group=grp_sig)
+max_hold   = input.int(12, "Max Hold (hours/bars)", minval=1, group=grp_sig)
+
+grp_hurst  = "Hurst Exponent"
+hurst_len  = input.int(100, "Lookback", minval=50, group=grp_hurst)
+hurst_show = input.bool(true, "Show Hurst", group=grp_hurst)
+
+grp_auto   = "Autocorrelation"
+auto_len   = input.int(48, "Lookback", minval=10, group=grp_auto)
+auto_show  = input.bool(true, "Show Autocorrelation", group=grp_auto)
+
+grp_ent    = "Return Entropy"
+ent_len    = input.int(48, "Lookback", minval=20, group=grp_ent)
+ent_show   = input.bool(true, "Show Entropy", group=grp_ent)
+
+grp_vol    = "Volatility Regime"
+atr_len    = input.int(14, "ATR Length", group=grp_vol)
+atr_low_q  = input.float(0.51, "Low Vol Threshold (ATR%)", step=0.01, tooltip="ATR% below this = low vol regime, avoid trading", group=grp_vol)
+
+grp_fund   = "Funding Rate"
+fund_show  = input.bool(true, "Show Funding Signal", group=grp_fund)
+fund_zscore_len = input.int(168, "Z-Score Lookback (hours)", group=grp_fund)
+
+grp_score  = "Composite Score"
+score_show = input.bool(true, "Show Composite Score", group=grp_score)
+score_thr  = input.float(0.55, "Signal Threshold", minval=0.0, maxval=1.0, step=0.05, group=grp_score)
+
+// ─── HELPER: LOG RETURNS ────────────────────────────────────────────────────
+log_ret = math.log(close / close[1])
+
+// ─── 1. HURST EXPONENT (simplified rescaled-range) ─────────────────────────
+// H > 0.5 = trending, H < 0.5 = mean-reverting, H ~ 0.5 = random walk
+// The model's #1 most important feature
+
+hurst_calc() =>
+    float sum_log_rs = 0.0
+    float sum_log_n = 0.0
+    float sum_log_rs_sq = 0.0
+    float sum_log_n_sq = 0.0
+    float sum_cross = 0.0
+    int count = 0
+
+    for lag = 2 to 20
+        float tau = 0.0
+        for j = 0 to hurst_len - lag - 1
+            diff = close[j] - close[j + lag]
+            tau += diff * diff
+        tau := math.sqrt(tau / (hurst_len - lag))
+        if tau > 0
+            ln_tau = math.log(tau)
+            ln_lag = math.log(lag)
+            sum_log_rs += ln_tau
+            sum_log_n += ln_lag
+            sum_log_rs_sq += ln_tau * ln_tau
+            sum_log_n_sq += ln_lag * ln_lag
+            sum_cross += ln_tau * ln_lag
+            count += 1
+
+    if count > 1
+        // Linear regression slope = Hurst exponent
+        denom = count * sum_log_n_sq - sum_log_n * sum_log_n
+        if denom != 0
+            (count * sum_cross - sum_log_n * sum_log_rs) / denom
+        else
+            0.5
+    else
+        0.5
+
+hurst = hurst_calc()
+
+// ─── 2. RETURN ENTROPY (Shannon entropy of discretized returns) ─────────────
+// Low entropy = predictable, High entropy = random
+// Model's #3 most important feature
+
+entropy_calc() =>
+    // Discretize returns into 10 bins
+    float min_r = 1e10
+    float max_r = -1e10
+    for i = 0 to ent_len - 1
+        r = nz(log_ret[i])
+        min_r := math.min(min_r, r)
+        max_r := math.max(max_r, r)
+
+    float bin_width = (max_r - min_r + 1e-10) / 10
+    // Count occurrences in each bin
+    var float ent = 0.0
+    float total = 0.0
+    array<float> bins = array.new_float(10, 0.0)
+
+    for i = 0 to ent_len - 1
+        r = nz(log_ret[i])
+        int bin_idx = math.min(int((r - min_r) / bin_width), 9)
+        array.set(bins, bin_idx, array.get(bins, bin_idx) + 1.0)
+        total += 1.0
+
+    ent := 0.0
+    for b = 0 to 9
+        float p = array.get(bins, b) / total
+        if p > 0
+            ent -= p * math.log(p)
+    ent
+
+entropy = entropy_calc()
+entropy_norm = entropy / math.log(10)  // Normalize to 0-1 (max entropy = log(10))
+
+// ─── 3. AUTOCORRELATION (lag-1) ─────────────────────────────────────────────
+// Positive = trending/momentum, Negative = mean-reverting
+// Model's #4 most important feature
+
+autocorr_calc(int lookback, int lag) =>
+    float sum_xy = 0.0
+    float sum_x = 0.0
+    float sum_y = 0.0
+    float sum_x2 = 0.0
+    float sum_y2 = 0.0
+    int n = lookback - lag
+
+    for i = 0 to n - 1
+        float x = nz(log_ret[i + lag])
+        float y = nz(log_ret[i])
+        sum_xy += x * y
+        sum_x += x
+        sum_y += y
+        sum_x2 += x * x
+        sum_y2 += y * y
+
+    float denom = math.sqrt((n * sum_x2 - sum_x * sum_x) * (n * sum_y2 - sum_y * sum_y))
+    if denom != 0
+        (n * sum_xy - sum_x * sum_y) / denom
+    else
+        0.0
+
+autocorr1 = autocorr_calc(auto_len, 1)
+autocorr5 = autocorr_calc(auto_len, 5)
+
+// ─── 4. GARMAN-KLASS VOLATILITY ────────────────────────────────────────────
+// More efficient than close-to-close vol (uses OHLC range)
+// Model's #7 most important feature
+
+gk_bar = 0.5 * math.pow(math.log(high / low), 2) - (2 * math.log(2) - 1) * math.pow(math.log(close / open), 2)
+gk_vol = math.sqrt(ta.sma(gk_bar, 24))
+
+// ─── 5. FUNDING RATE SIGNAL ────────────────────────────────────────────────
+// Funding z-score > +2 = overcrowded longs (bearish)
+// Funding z-score < -2 = overcrowded shorts (bullish)
+// Features #5, #6, #11, #14 in importance
+
+// Note: Funding rate may not be available on all chart types.
+// On Bybit perps it should show up. Using a placeholder for non-perp charts.
+fund_rate  = 0.0  // Replace with actual funding if available via external data
+fund_ma    = ta.sma(fund_rate, fund_zscore_len)
+fund_std   = ta.stdev(fund_rate, fund_zscore_len)
+fund_zscore = fund_std != 0 ? (fund_rate - fund_ma) / fund_std : 0.0
+fund_mr     = -fund_zscore  // Mean-reversion signal (model's feature)
+
+// ─── 6. ATR REGIME FILTER ──────────────────────────────────────────────────
+atr_val = ta.atr(atr_len)
+atr_pct = atr_val / close * 100
+regime_ok = atr_pct >= atr_low_q  // true = OK to trade
+
+// ─── 7. MOMENTUM ALIGNMENT ─────────────────────────────────────────────────
+mom_1h  = log_ret
+mom_4h  = math.log(close / close[4])
+mom_12h = math.log(close / close[12])
+mom_24h = math.log(close / close[24])
+mom_72h = math.log(close / close[72])
+mom_168h = math.log(close / close[168])  // 1-week momentum (model's #12 feature)
+
+// Count how many timeframes agree on direction
+mom_bullish = (mom_1h > 0 ? 1 : 0) + (mom_4h > 0 ? 1 : 0) + (mom_12h > 0 ? 1 : 0) +
+              (mom_24h > 0 ? 1 : 0) + (mom_72h > 0 ? 1 : 0) + (mom_168h > 0 ? 1 : 0)
+mom_alignment = mom_bullish / 6.0  // 0 = all bearish, 1 = all bullish
+
+// ─── 8. COMPOSITE SCORE (calibrated model approximation) ───────────────────
+// Each sub-score is normalised to 0-1, then weighted by feature importance.
+// Key fix: individual components are scaled to their realistic ranges.
+
+// Trend regime (0-1): Hurst 0.3-0.7 → 0-1
+trend_regime = math.max(math.min((hurst - 0.3) / 0.4, 1.0), 0.0)
+
+// Autocorrelation (0-1): autocorr1 typically in -0.3 to +0.3
+auto_long  = math.max(math.min((autocorr1 + 0.3) / 0.6, 1.0), 0.0)
+auto_short = 1.0 - auto_long
+
+// Predictability (0-1): low entropy = more predictable
+predict_score = math.max(1.0 - entropy_norm, 0.0)
+
+// Volume flow (OBV direction)
+obv_val = ta.obv
+obv_ma_val = ta.sma(obv_val, 20)
+vol_long  = obv_val > obv_ma_val ? 0.7 : 0.3
+vol_short = obv_val > obv_ma_val ? 0.3 : 0.7
+
+// Momentum alignment
+mom_long  = mom_alignment
+mom_short = 1.0 - mom_alignment
+
+// RSI confirmation
+rsi_v = ta.rsi(close, 14)
+rsi_long  = rsi_v < 30 ? 1.0 : rsi_v < 50 ? 0.6 : rsi_v > 70 ? 0.2 : 0.4
+rsi_short = rsi_v > 70 ? 1.0 : rsi_v > 50 ? 0.6 : rsi_v < 30 ? 0.2 : 0.4
+
+// Weighted composite (weights ≈ feature importance)
+long_composite  = 0.25 * trend_regime + 0.15 * auto_long  + 0.15 * predict_score + 0.20 * mom_long  + 0.10 * vol_long  + 0.05 * rsi_long  + 0.10 * 0.5
+short_composite = 0.25 * trend_regime + 0.15 * auto_short + 0.15 * predict_score + 0.20 * mom_short + 0.10 * vol_short + 0.05 * rsi_short + 0.10 * 0.5
+
+// ─── PLOTTING ───────────────────────────────────────────────────────────────
+
+// Background: regime filter
+bgcolor(not regime_ok ? color.new(color.gray, 90) : na, title="Low Vol Regime")
+
+// Plot composite score
+plot(score_show ? long_composite : na, "Long Score", color=color.new(color.green, 20), linewidth=2)
+plot(score_show ? short_composite : na, "Short Score", color=color.new(color.red, 20), linewidth=2)
+hline(score_thr, "Signal Threshold", color=color.orange, linestyle=hline.style_dashed)
+hline(0.5, "Midline", color=color.gray, linestyle=hline.style_dotted)
+
+// Plot individual indicators (optional)
+plot(hurst_show ? hurst : na, "Hurst", color=color.new(color.blue, 40), linewidth=1)
+plot(auto_show ? autocorr1 : na, "Autocorr(1)", color=color.new(color.purple, 40), linewidth=1)
+plot(ent_show ? entropy_norm : na, "Entropy (norm)", color=color.new(color.yellow, 40), linewidth=1)
+
+// Signal markers
+long_signal  = long_composite >= score_thr and regime_ok and long_composite > short_composite
+short_signal = short_composite >= score_thr and regime_ok and short_composite > long_composite
+
+plotshape(long_signal and not long_signal[1], "Long Signal", shape.triangleup,
+          location.bottom, color.new(color.green, 0), size=size.small)
+plotshape(short_signal and not short_signal[1], "Short Signal", shape.triangledown,
+          location.top, color.new(color.red, 0), size=size.small)
+
+// ─── INFO TABLE ─────────────────────────────────────────────────────────────
+var table info = table.new(position.top_right, 2, 10, bgcolor=color.new(color.black, 80))
+
+if barstate.islast
+    table.cell(info, 0, 0, "8H Regression Dashboard", text_color=color.white, text_size=size.normal)
+    table.cell(info, 1, 0, "", text_color=color.white)
+
+    table.cell(info, 0, 1, "Hurst Exp", text_color=color.gray, text_size=size.small)
+    h_color = hurst > 0.55 ? color.green : hurst < 0.45 ? color.red : color.yellow
+    h_label = hurst > 0.55 ? "TRENDING" : hurst < 0.45 ? "REVERTING" : "RANDOM"
+    table.cell(info, 1, 1, str.tostring(hurst, "#.###") + " " + h_label, text_color=h_color, text_size=size.small)
+
+    table.cell(info, 0, 2, "Autocorr(1)", text_color=color.gray, text_size=size.small)
+    a_color = autocorr1 > 0.1 ? color.green : autocorr1 < -0.1 ? color.red : color.yellow
+    table.cell(info, 1, 2, str.tostring(autocorr1, "#.###"), text_color=a_color, text_size=size.small)
+
+    table.cell(info, 0, 3, "Entropy", text_color=color.gray, text_size=size.small)
+    e_color = entropy_norm < 0.7 ? color.green : color.red
+    e_label = entropy_norm < 0.7 ? "PREDICTABLE" : "RANDOM"
+    table.cell(info, 1, 3, str.tostring(entropy_norm, "#.###") + " " + e_label, text_color=e_color, text_size=size.small)
+
+    table.cell(info, 0, 4, "GK Volatility", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 4, str.tostring(gk_vol, "#.#####"), text_color=color.white, text_size=size.small)
+
+    table.cell(info, 0, 5, "ATR Regime", text_color=color.gray, text_size=size.small)
+    r_color = regime_ok ? color.green : color.red
+    r_label = regime_ok ? "OK (" + str.tostring(atr_pct, "#.##") + "%)" : "LOW VOL (" + str.tostring(atr_pct, "#.##") + "%)"
+    table.cell(info, 1, 5, r_label, text_color=r_color, text_size=size.small)
+
+    table.cell(info, 0, 6, "Mom Alignment", text_color=color.gray, text_size=size.small)
+    m_color = mom_alignment > 0.6 ? color.green : mom_alignment < 0.4 ? color.red : color.yellow
+    m_label = str.tostring(mom_bullish, "#") + "/6 bullish"
+    table.cell(info, 1, 6, m_label, text_color=m_color, text_size=size.small)
+
+    table.cell(info, 0, 7, "Long Score", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 7, str.tostring(long_composite, "#.###"), text_color=color.green, text_size=size.small)
+
+    table.cell(info, 0, 8, "Short Score", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 8, str.tostring(short_composite, "#.###"), text_color=color.red, text_size=size.small)
+
+    signal_text = long_signal ? "🟢 LONG" : short_signal ? "🔴 SHORT" : "⚪ HOLD"
+    signal_color = long_signal ? color.green : short_signal ? color.red : color.gray
+    table.cell(info, 0, 9, "Signal", text_color=color.white, text_size=size.normal)
+    table.cell(info, 1, 9, signal_text, text_color=signal_color, text_size=size.normal)
+
+// ─── ALERTS ─────────────────────────────────────────────────────────────────
+alertcondition(long_signal and not long_signal[1], "Long Signal", "BTC 8H Model: LONG signal detected")
+alertcondition(short_signal and not short_signal[1], "Short Signal", "BTC 8H Model: SHORT signal detected")
+alertcondition(not regime_ok, "Low Vol Regime", "BTC 8H Model: Low volatility regime — avoid trading")
