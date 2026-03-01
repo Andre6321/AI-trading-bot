@@ -1,0 +1,253 @@
+{
+  "model_type": "regression_8h",
+  "horizon_hours": 8,
+  "feature_cols": [
+    "log_ret_1h",
+    "log_ret_4h",
+    "log_ret_24h",
+    "ma_10",
+    "ma_20",
+    "ma_50",
+    "ma_100",
+    "rsi_14",
+    "atr_14",
+    "vol_24h",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "price_vs_ma_20",
+    "price_vs_ma_50",
+    "hl_spread_pct",
+    "close_position",
+    "volume_ma_24h",
+    "volume_ratio",
+    "momentum_3h",
+    "momentum_12h",
+    "close_4h",
+    "high_4h",
+    "low_4h",
+    "close_1d",
+    "high_1d",
+    "low_1d",
+    "volume_1d",
+    "rsi_1h",
+    "rsi_4h",
+    "rsi_1d",
+    "ma_20_1h",
+    "ma_20_4h",
+    "ma_20_1d",
+    "trend_alignment",
+    "bb_middle",
+    "bb_std",
+    "bb_upper",
+    "bb_lower",
+    "bb_width",
+    "bb_position",
+    "atr",
+    "atr_percentile",
+    "hist_volatility",
+    "volatility_regime",
+    "volume_ma_20",
+    "volume_ma_50",
+    "volume_spike",
+    "vwap",
+    "price_vs_vwap",
+    "obv",
+    "obv_ma",
+    "obv_trend",
+    "vpt",
+    "adx",
+    "strong_trend",
+    "macd",
+    "macd_signal",
+    "macd_hist",
+    "macd_cross",
+    "sar",
+    "sar_trend",
+    "cci",
+    "williams_r",
+    "momentum_10",
+    "momentum_20",
+    "roc_10",
+    "roc_20",
+    "distance_from_high",
+    "distance_from_low",
+    "body_size",
+    "upper_shadow",
+    "lower_shadow",
+    "is_doji",
+    "price_level",
+    "level_touches",
+    "funding_cum_8h",
+    "funding_cum_24h",
+    "funding_cum_72h",
+    "funding_zscore",
+    "funding_mr_signal",
+    "funding_accel",
+    "funding_extreme_long",
+    "funding_extreme_short",
+    "hurst_exp",
+    "autocorr_1",
+    "autocorr_5",
+    "realized_skew_24",
+    "realized_kurt_24",
+    "gk_volatility",
+    "return_entropy_48",
+    "vol_clock_ret",
+    "mom_1h",
+    "mom_4h",
+    "mom_12h",
+    "mom_24h",
+    "mom_72h",
+    "mom_168h",
+    "momentum_alignment",
+    "price_accel",
+    "breakout_intensity",
+    "volume_imbalance_24",
+    "vol_ratio_4h",
+    "vol_ratio_12h",
+    "vol_ratio_24h",
+    "vol_ratio_72h",
+    "vol_regime_ratio",
+    "trend_consistency_24",
+    "trend_consistency_72",
+    "vol_x_momentum",
+    "gk_vol_x_hurst",
+    "entropy_x_vol_regime",
+    "ret_lag_2h",
+    "ret_lag_3h",
+    "ret_lag_6h",
+    "ret_lag_12h"
+  ],
+  "n_features": 117,
+  "n_training_samples": 43027,
+  "data_range": "2021-01-06 23:00:00 to 2025-12-05 15:00:00",
+  "trained_at": "2026-02-23 04:02:29.755150",
+  "lgb_model_path": "C:\\Users\\andre\\bybit_ai_trader\\models\\reg_8h_lgb_final.txt",
+  "xgb_model_path": "C:\\Users\\andre\\bybit_ai_trader\\models\\reg_8h_xgb_final.json",
+  "signal_thresholds": {
+    "top_5pct": {
+      "long": 0.7190758708164441,
+      "short": 0.6945077564488987
+    },
+    "top_10pct": {
+      "long": 0.6480427237774976,
+      "short": 0.6305458008456122
+    },
+    "top_20pct": {
+      "long": 0.5851957174326916,
+      "short": 0.5690190182528667
+    }
+  },
+  "atr_pct_25_threshold": 0.5095664849348747,
+  "top_20_features": [
+    [
+      "hurst_exp",
+      852.0
+    ],
+    [
+      "vpt",
+      597.0
+    ],
+    [
+      "return_entropy_48",
+      593.0
+    ],
+    [
+      "autocorr_1",
+      551.0
+    ],
+    [
+      "funding_cum_24h",
+      541.0
+    ],
+    [
+      "funding_cum_72h",
+      537.0
+    ],
+    [
+      "gk_volatility",
+      512.0
+    ],
+    [
+      "gk_vol_x_hurst",
+      511.0
+    ],
+    [
+      "obv_ma",
+      493.0
+    ],
+    [
+      "dow_sin",
+      452.0
+    ],
+    [
+      "funding_zscore",
+      450.0
+    ],
+    [
+      "mom_168h",
+      448.0
+    ],
+    [
+      "ma_20_1d",
+      431.0
+    ],
+    [
+      "funding_accel",
+      425.0
+    ],
+    [
+      "rsi_1d",
+      421.0
+    ],
+    [
+      "autocorr_5",
+      415.0
+    ],
+    [
+      "funding_mr_signal",
+      401.0
+    ],
+    [
+      "realized_kurt_24",
+      396.0
+    ],
+    [
+      "obv",
+      391.0
+    ],
+    [
+      "realized_skew_24",
+      380.0
+    ]
+  ],
+  "best_strategy_config": {
+    "signal": "top_5pct",
+    "direction": "both",
+    "fee_tier": "vip",
+    "exit_mode": "trailing",
+    "trail_mult_atr": 0.75,
+    "tp_mult_atr": 3.0,
+    "sl_mult_atr": 1.5,
+    "max_hold_bars": 12,
+    "cooldown_bars": 0
+  },
+  "backtest_results": {
+    "profit_factor": 1.54,
+    "win_rate": 0.47,
+    "total_return_pct": 19.6,
+    "max_drawdown_pct": 2.0,
+    "sharpe_ratio": 4.06,
+    "n_trades_5yr": 592,
+    "avg_trade_pnl_usd": 8.27
+  },
+  "prediction_stats": {
+    "mean_pred": 0.00017093364439634082,
+    "std_pred": 0.0031014317578836707,
+    "min_pred": -0.030379032332474833,
+    "max_pred": 0.03009167065977684,
+    "pct_positive": 0.5301787249866363
+  }
+}

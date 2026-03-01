@@ -1,0 +1,385 @@
+// =============================================================================
+// BTC V8 Decay Strategy — SHORT-Only with Trailing Stop
+// =============================================================================
+//
+// Pine Script STRATEGY replicating the V8 decay8000 winning model signals.
+// Use on BTCUSDT Perpetual, 1H timeframe.
+//
+// The ML model (XGBoost + LightGBM + CatBoost ensemble with exponential decay
+// sample weighting λ=8000) predicts 8h forward returns using 117 features.
+// This strategy approximates the top features in Pine Script:
+//   1. Hurst Exponent — trending vs mean-reverting detection
+//   2. Autocorrelation (lag-1, lag-5) — momentum persistence
+//   3. Return Entropy — market predictability
+//   4. Multi-horizon momentum alignment (1h/4h/12h/24h/72h/168h)
+//   5. Garman-Klass volatility regime
+//   6. RSI divergence from momentum
+//   7. Volume pressure (OBV trend)
+//
+// V8 backtest results (Python walk-forward, 4 years, 2021-2025):
+//   PF=1.64, WR=49.8%, Sharpe=5.01, MaxDD=1.1%, +$1,651 on $25K
+//   223 trades (all SHORT), Avg Win=$38.23, Avg Loss=$-23.16
+//   Config: TP=2.0×ATR, SL=1.0×ATR, Trail=0.75×ATR, MaxHold=12 bars
+//
+// Key V8 insight: Exponential decay weighting (half-life=8000 bars) means
+// the model prioritizes RECENT market behaviour over old data. This gives
+// the model better adaptability to evolving crypto market microstructure.
+//
+// =============================================================================
+
+//@version=6
+strategy("BTC V8 Decay — SHORT Only", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=25,
+     initial_capital=25000,
+     commission_type=strategy.commission.percent,
+     commission_value=0.01,
+     slippage=1,
+     pyramiding=0,
+     calc_on_every_tick=false,
+     process_orders_on_close=false,
+     max_bars_back=500)
+
+// ─── INPUTS ─────────────────────────────────────────────────────────────────
+grp_entry = "Entry Settings (V8 Best Config)"
+sl_mult    = input.float(1.0, "Stop Loss (× ATR)", step=0.1, group=grp_entry, tooltip="V8 best: 1.0 ATR. Tight SL gives edge with trailing.")
+tp_mult    = input.float(2.0, "Take Profit (× ATR)", step=0.1, group=grp_entry, tooltip="V8 best: 2.0 ATR. 2:1 reward-to-risk ratio.")
+trail_mult = input.float(0.75, "Trailing Stop (× ATR)", step=0.05, group=grp_entry, tooltip="V8 best: 0.75 ATR. Locks in profits on retracements.")
+max_hold   = input.int(12, "Max Hold Bars", minval=1, group=grp_entry, tooltip="Close after 12 bars (12h on 1H chart). Only 1.3% exit by timeout.")
+atr_len    = input.int(14, "ATR Length", group=grp_entry)
+
+grp_filter = "Signal Filters"
+min_atr_pct     = input.float(0.4, "Min ATR% (regime filter)", step=0.05, group=grp_filter, tooltip="Skip low-volatility chop zones")
+hurst_len       = input.int(100, "Hurst Lookback", minval=50, group=grp_filter)
+auto_len        = input.int(48, "Autocorrelation Lookback", minval=10, group=grp_filter)
+ent_len         = input.int(48, "Entropy Lookback", minval=20, group=grp_filter)
+rsi_len         = input.int(14, "RSI Length", group=grp_filter)
+score_thr_short = input.float(0.58, "Short Score Threshold", step=0.01, minval=0, maxval=1, group=grp_filter, tooltip="Higher = fewer but better trades. V8 top5% ≈ 0.58")
+
+grp_extra = "Advanced Filters"
+use_decay_bias  = input.bool(true, "Recency Bias (Decay Filter)", group=grp_extra, tooltip="Weight recent price action more heavily in scoring, mimicking exponential decay training")
+decay_lookback  = input.int(200, "Decay Lookback (bars)", minval=50, group=grp_extra, tooltip="How far back to compute recency-biased stats")
+use_vol_filter  = input.bool(true, "Volume Confirmation", group=grp_extra, tooltip="Require bearish OBV to confirm short entry")
+use_rsi_filter  = input.bool(true, "RSI Overbought Filter", group=grp_extra, tooltip="Only short when RSI > 50 (not oversold)")
+
+grp_time = "Time Filter"
+use_time_filter = input.bool(false, "Use Session Filter", group=grp_time)
+sess = input.session("0800-2000", "Trading Session (UTC)", group=grp_time)
+
+// ─── CORE CALCULATIONS ─────────────────────────────────────────────────────
+
+log_ret = math.log(close / close[1])
+atr_val = ta.atr(atr_len)
+atr_pct = atr_val / close * 100
+rsi_val = ta.rsi(close, rsi_len)
+
+// ─── 1. HURST EXPONENT ─────────────────────────────────────────────────────
+// H > 0.5 = trending (momentum continues)
+// H < 0.5 = mean-reverting (fade moves)
+// #1 most important feature in the ML model
+
+hurst_calc() =>
+    float sum_log_tau = 0.0
+    float sum_log_lag = 0.0
+    float sum_cross = 0.0
+    float sum_log_lag_sq = 0.0
+    int count = 0
+    for lag = 2 to 20
+        float tau = 0.0
+        for j = 0 to hurst_len - lag - 1
+            diff = close[j] - close[j + lag]
+            tau += diff * diff
+        tau := math.sqrt(tau / math.max(hurst_len - lag, 1))
+        if tau > 0
+            float lt = math.log(tau)
+            float ll = math.log(lag)
+            sum_log_tau += lt
+            sum_log_lag += ll
+            sum_cross += lt * ll
+            sum_log_lag_sq += ll * ll
+            count += 1
+    if count > 1
+        float denom = count * sum_log_lag_sq - sum_log_lag * sum_log_lag
+        denom != 0 ? (count * sum_cross - sum_log_lag * sum_log_tau) / denom : 0.5
+    else
+        0.5
+
+hurst = hurst_calc()
+
+// ─── 2. AUTOCORRELATION (lag-1 and lag-5) ───────────────────────────────────
+// Negative autocorrelation on short = mean-reversion (good for shorting after pump)
+// Positive = momentum continues (wait for exhaustion)
+// #4 and #16 most important features
+
+autocorr(int lookback, int lag) =>
+    float sx = 0.0, float sy = 0.0, float sxy = 0.0
+    float sx2 = 0.0, float sy2 = 0.0
+    int n = lookback - lag
+    for i = 0 to n - 1
+        float x = nz(log_ret[i + lag])
+        float y = nz(log_ret[i])
+        sx += x
+        sy += y
+        sxy += x * y
+        sx2 += x * x
+        sy2 += y * y
+    float denom = math.sqrt((n * sx2 - sx * sx) * (n * sy2 - sy * sy))
+    denom != 0 ? (n * sxy - sx * sy) / denom : 0.0
+
+autocorr1 = autocorr(auto_len, 1)
+autocorr5 = autocorr(auto_len, 5)
+
+// ─── 3. RETURN ENTROPY ─────────────────────────────────────────────────────
+// Low entropy = predictable market (trade with confidence)
+// High entropy = random noise (avoid)
+// #3 most important feature
+
+entropy_calc() =>
+    float min_r = 1e10
+    float max_r = -1e10
+    for i = 0 to ent_len - 1
+        float r = nz(log_ret[i])
+        min_r := math.min(min_r, r)
+        max_r := math.max(max_r, r)
+    float bw = (max_r - min_r + 1e-10) / 10.0
+    array<float> bins = array.new_float(10, 0.0)
+    float total = 0.0
+    for i = 0 to ent_len - 1
+        float r = nz(log_ret[i])
+        int bi = math.min(int((r - min_r) / bw), 9)
+        array.set(bins, bi, array.get(bins, bi) + 1.0)
+        total += 1.0
+    float ent = 0.0
+    for b = 0 to 9
+        float p = array.get(bins, b) / total
+        if p > 0
+            ent -= p * math.log(p)
+    ent / math.log(10)  // Normalise to 0-1
+
+entropy = entropy_calc()
+
+// ─── 4. GARMAN-KLASS VOLATILITY ────────────────────────────────────────────
+// More efficient than close-to-close vol. Uses OHLC data. #7 in importance.
+gk_bar = 0.5 * math.pow(math.log(high / low), 2) - (2 * math.log(2) - 1) * math.pow(math.log(close / open), 2)
+gk_vol = math.sqrt(math.max(ta.sma(gk_bar, 24), 0))
+
+// ─── 5. MULTI-HORIZON MOMENTUM ─────────────────────────────────────────────
+// The model uses momentum at 1h, 4h, 12h, 24h, 72h, 168h
+// For SHORT: we want bearish alignment (most timeframes pointing down)
+// 168h momentum is #12 in importance.
+
+mom_1h   = log_ret
+mom_4h   = math.log(close / close[4])
+mom_12h  = math.log(close / close[12])
+mom_24h  = math.log(close / close[24])
+mom_72h  = math.log(close / close[72])
+mom_168h = math.log(close / close[168])
+
+// Bearish alignment: what fraction of timeframes point DOWN
+bear_count = (mom_1h < 0 ? 1.0 : 0.0) + (mom_4h < 0 ? 1.0 : 0.0) +
+             (mom_12h < 0 ? 1.0 : 0.0) + (mom_24h < 0 ? 1.0 : 0.0) +
+             (mom_72h < 0 ? 1.0 : 0.0) + (mom_168h < 0 ? 1.0 : 0.0)
+bear_alignment = bear_count / 6.0  // 1.0 = all bearish, 0.0 = all bullish
+
+// ─── 6. VOLUME PRESSURE (OBV trend) ────────────────────────────────────────
+// Bearish OBV = sellers dominating. #9 in importance.
+obv = ta.obv
+obv_ma = ta.sma(obv, 20)
+obv_bearish = obv < obv_ma
+
+// ─── 7. RSI — OVERBOUGHT CONFIRMATION ──────────────────────────────────────
+// For SHORT-only: we prefer RSI > 50 (overbought zone to fade)
+// RSI at 1D timeframe is #15 in importance
+rsi_ready = rsi_val > 50
+
+// ─── 8. RECENCY-BIASED SCORING (V8 DECAY APPROXIMATION) ────────────────────
+// The V8 model's key edge is exponential decay weighting: recent data gets
+// much more weight during training. We approximate this by computing a
+// "recent momentum shift" — how much has the bearish signal strengthened
+// in the recent window vs. the full lookback.
+
+recent_autocorr1 = autocorr(24, 1)  // Last 24 bars only (1 day)
+decay_boost = use_decay_bias ? (recent_autocorr1 < autocorr1 ? 0.08 : 0.0) : 0.0
+// If recent autocorrelation is more negative than the full lookback,
+// it means bearish mean-reversion is INCREASING — boost signal
+
+// Recent momentum acceleration (last 12h vs last 72h)
+mom_accel = mom_12h < mom_72h / 6 ? 0.05 : 0.0
+// If 12h momentum is more negative than expected from 72h trend,
+// short-term selling is accelerating
+
+// ─── COMPOSITE SHORT SCORE ─────────────────────────────────────────────────
+// Weights roughly proportional to model feature importance
+// All sub-scores normalised to 0-1 range
+
+// --- Trend regime (0-1): trending market is better for directional bets ---
+trend_regime = math.max(math.min((hurst - 0.3) / 0.4, 1.0), 0.0)
+
+// --- Autocorrelation (0-1): negative = mean-reverting = good for fading ---
+auto_score_short = 1.0 - math.max(math.min((autocorr1 + 0.3) / 0.6, 1.0), 0.0)
+
+// --- Predictability (0-1): low entropy = predictable ---
+predict_score = math.max(1.0 - entropy, 0.0)
+
+// --- Bearish momentum (0-1): already from bear_alignment ---
+mom_score_short = bear_alignment
+
+// --- Volume (0-1): bearish OBV confirmation ---
+vol_score_short = obv_bearish ? 0.7 : 0.3
+
+// --- RSI (0-1): overbought = good short entry ---
+rsi_score_short = rsi_val > 70 ? 1.0 : rsi_val > 50 ? 0.65 : rsi_val < 30 ? 0.2 : 0.4
+
+// --- GK Vol regime: prefer moderate vol ---
+gk_mean = ta.sma(gk_vol, 100)
+gk_ratio = gk_vol / (gk_mean + 1e-10)
+vol_regime_score = gk_ratio > 0.5 and gk_ratio < 2.0 ? 0.7 : 0.3
+
+// --- Weighted composite ---
+w_trend  = 0.25
+w_auto   = 0.15
+w_pred   = 0.15
+w_mom    = 0.20
+w_vol    = 0.10
+w_rsi    = 0.05
+w_gk     = 0.10
+
+short_score = w_trend * trend_regime +
+              w_auto  * auto_score_short +
+              w_pred  * predict_score +
+              w_mom   * mom_score_short +
+              w_vol   * vol_score_short +
+              w_rsi   * rsi_score_short +
+              w_gk    * vol_regime_score +
+              decay_boost +
+              mom_accel
+
+// ─── FILTERS ────────────────────────────────────────────────────────────────
+regime_ok  = atr_pct >= min_atr_pct
+in_session = use_time_filter ? not na(time(timeframe.period, sess)) : true
+vol_ok     = use_vol_filter ? obv_bearish : true
+rsi_ok     = use_rsi_filter ? rsi_ready : true
+
+// ─── SHORT ENTRY CONDITION ──────────────────────────────────────────────────
+short_entry = short_score >= score_thr_short and
+              regime_ok and in_session and
+              vol_ok and rsi_ok
+
+// ─── POSITION MANAGEMENT ───────────────────────────────────────────────────
+var int bars_in_trade = 0
+var float entry_atr = na
+
+if strategy.position_size != 0
+    bars_in_trade += 1
+else
+    bars_in_trade := 0
+    entry_atr := na
+
+// ─── EXECUTE SHORT ENTRIES ──────────────────────────────────────────────────
+if short_entry and strategy.position_size == 0
+    entry_atr := atr_val
+    float sl_price = close + sl_mult * atr_val
+    float tp_price = close - tp_mult * atr_val
+    strategy.entry("SHORT", strategy.short)
+    strategy.exit("Trail S", "SHORT",
+         stop=sl_price,
+         limit=tp_price,
+         trail_offset=math.round(trail_mult * atr_val / syminfo.mintick),
+         trail_points=math.round(0.5 * atr_val / syminfo.mintick))
+    bars_in_trade := 0
+
+// ─── MAX HOLD EXIT ──────────────────────────────────────────────────────────
+if bars_in_trade >= max_hold and strategy.position_size != 0
+    strategy.close_all("Max Hold")
+    bars_in_trade := 0
+
+// ─── PLOTTING ───────────────────────────────────────────────────────────────
+
+// SL / TP lines while in position
+var float plot_sl = na
+var float plot_tp = na
+
+if strategy.position_size < 0
+    plot_sl := strategy.position_avg_price + sl_mult * nz(entry_atr, atr_val)
+    plot_tp := strategy.position_avg_price - tp_mult * nz(entry_atr, atr_val)
+else
+    plot_sl := na
+    plot_tp := na
+
+plot(plot_sl, "Stop Loss", color=color.new(color.red, 30), style=plot.style_linebr, linewidth=2)
+plot(plot_tp, "Take Profit", color=color.new(color.green, 30), style=plot.style_linebr, linewidth=2)
+
+// Entry signals
+plotshape(short_entry and strategy.position_size == 0,
+     "SELL", shape.labeldown, location.abovebar,
+     color=color.new(color.red, 0), text="SHORT", textcolor=color.white, size=size.normal)
+
+// Regime background
+bgcolor(not regime_ok ? color.new(color.gray, 92) : na, title="Low Vol (skip)")
+bgcolor(strategy.position_size < 0 ? color.new(color.red, 93) : na, title="In Short")
+
+// ─── INFO TABLE ─────────────────────────────────────────────────────────────
+var table info = table.new(position.top_right, 2, 14, bgcolor=color.new(color.black, 75), border_width=1, border_color=color.new(color.gray, 60))
+
+if barstate.islast
+    table.cell(info, 0, 0, "V8 Decay Strategy", text_color=color.orange, text_size=size.normal, text_halign=text.align_left)
+    table.cell(info, 1, 0, "SHORT ONLY", text_color=color.orange, text_size=size.small)
+
+    table.cell(info, 0, 1, "Hurst", text_color=color.gray, text_size=size.small)
+    h_color = hurst > 0.55 ? color.lime : hurst < 0.45 ? color.orange : color.yellow
+    h_text  = hurst > 0.55 ? "TREND" : hurst < 0.45 ? "REVERT" : "RANDOM"
+    table.cell(info, 1, 1, str.tostring(hurst, "#.##") + "  " + h_text, text_color=h_color, text_size=size.small)
+
+    table.cell(info, 0, 2, "Autocorr", text_color=color.gray, text_size=size.small)
+    a_color = autocorr1 < -0.05 ? color.lime : autocorr1 > 0.05 ? color.orange : color.yellow
+    table.cell(info, 1, 2, str.tostring(autocorr1, "+#.###;-#.###"), text_color=a_color, text_size=size.small)
+
+    table.cell(info, 0, 3, "Entropy", text_color=color.gray, text_size=size.small)
+    e_color = entropy < 0.75 ? color.lime : entropy > 0.9 ? color.orange : color.yellow
+    e_text  = entropy < 0.75 ? "PREDICTABLE" : entropy > 0.9 ? "NOISY" : "MIXED"
+    table.cell(info, 1, 3, str.tostring(entropy, "#.##") + "  " + e_text, text_color=e_color, text_size=size.small)
+
+    table.cell(info, 0, 4, "Bearish Align", text_color=color.gray, text_size=size.small)
+    m_color = bear_alignment > 0.6 ? color.lime : bear_alignment < 0.4 ? color.orange : color.yellow
+    m_text  = str.tostring(bear_count, "#") + "/6 bear"
+    table.cell(info, 1, 4, m_text, text_color=m_color, text_size=size.small)
+
+    table.cell(info, 0, 5, "OBV Trend", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 5, obv_bearish ? "BEARISH ✓" : "BULLISH ✗", text_color=obv_bearish ? color.lime : color.orange, text_size=size.small)
+
+    table.cell(info, 0, 6, "RSI", text_color=color.gray, text_size=size.small)
+    rsi_color = rsi_val > 70 ? color.lime : rsi_val > 50 ? color.yellow : color.orange
+    table.cell(info, 1, 6, str.tostring(rsi_val, "#.#") + (rsi_val > 50 ? " OB ✓" : " OS ✗"), text_color=rsi_color, text_size=size.small)
+
+    table.cell(info, 0, 7, "ATR Regime", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 7, regime_ok ? "OK  " + str.tostring(atr_pct, "#.##") + "%" : "LOW VOL  " + str.tostring(atr_pct, "#.##") + "%",
+         text_color=regime_ok ? color.lime : color.red, text_size=size.small)
+
+    table.cell(info, 0, 8, "GK Vol Ratio", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 8, str.tostring(gk_ratio, "#.##"), text_color=gk_ratio > 0.5 and gk_ratio < 2.0 ? color.lime : color.orange, text_size=size.small)
+
+    table.cell(info, 0, 9, " ", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 9, " ", text_color=color.gray, text_size=size.tiny)
+
+    table.cell(info, 0, 10, "SHORT Score", text_color=color.gray, text_size=size.small)
+    ss_color = short_score >= score_thr_short and regime_ok ? color.lime : color.white
+    table.cell(info, 1, 10, str.tostring(short_score, "#.###") + (short_score >= score_thr_short ? " ✓ READY" : " ✗"), text_color=ss_color, text_size=size.small)
+
+    table.cell(info, 0, 11, "Decay Boost", text_color=color.gray, text_size=size.small)
+    table.cell(info, 1, 11, str.tostring(decay_boost + mom_accel, "+#.###"), text_color=decay_boost + mom_accel > 0 ? color.lime : color.gray, text_size=size.small)
+
+    pos_text = strategy.position_size < 0 ? "🔴 SHORT" : short_entry ? "🔴 SELL NOW" : "⚪ FLAT"
+    pos_color = strategy.position_size < 0 ? color.orange : short_entry ? color.orange : color.gray
+    table.cell(info, 0, 12, "Position", text_color=color.white, text_size=size.normal)
+    table.cell(info, 1, 12, pos_text + (bars_in_trade > 0 ? "  " + str.tostring(bars_in_trade) + "/" + str.tostring(max_hold) + " bars" : ""), text_color=pos_color, text_size=size.normal)
+
+    table.cell(info, 0, 13, "Config", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 13, "TP" + str.tostring(tp_mult, "#.#") + " SL" + str.tostring(sl_mult, "#.#") + " Trail" + str.tostring(trail_mult, "#.##"), text_color=color.gray, text_size=size.tiny)
+
+// ─── ALERTS ─────────────────────────────────────────────────────────────────
+alertcondition(short_entry and strategy.position_size == 0, "SHORT Signal",
+     "V8 Decay: SHORT signal — Score={{plot_0}}")
+alertcondition(not regime_ok[1] and regime_ok, "Regime OK",
+     "V8 Decay: Volatility regime OK, ready to trade")
+alertcondition(bars_in_trade == max_hold - 1, "Max Hold Warning",
+     "V8 Decay: Position approaching max hold limit")

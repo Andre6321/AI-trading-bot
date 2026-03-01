@@ -201,11 +201,9 @@ class MLStrategy:
                 signal["action"] = "CLOSE"
                 signal["reasoning"].append("Close long position (bearish signal)")
             elif current_position is None:
-                # Note: Uncomment below to enable short trading
-                # signal["action"] = "ENTER"
-                # signal["side"] = "Sell"
-                # signal["reasoning"].append(f"Enter short position (confidence: {confidence:.3f})")
-                signal["reasoning"].append("Bearish signal but shorting disabled")
+                signal["action"] = "ENTER"
+                signal["side"] = "Sell"
+                signal["reasoning"].append(f"Enter short position (confidence: {confidence:.3f})")
         
         # Log signal
         if signal["action"] != "HOLD":

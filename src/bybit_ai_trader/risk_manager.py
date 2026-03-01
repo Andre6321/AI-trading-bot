@@ -84,16 +84,18 @@ class RiskManager:
         account_balance: float,
         entry_price: float,
         side: str,
-        signal_confidence: float = 1.0
+        signal_confidence: float = 1.0,
+        atr_pct: float = None
     ) -> float:
         """
-        Calculate position size based on risk parameters.
+        Calculate position size based on risk parameters with confidence scaling.
         
         Args:
             account_balance: Total account balance in USD
             entry_price: Expected entry price
             side: "Buy" or "Sell"
             signal_confidence: Signal confidence (0-1), scales position size
+            atr_pct: ATR as percentage of price (for volatility adjustment)
             
         Returns:
             Position size in base currency
@@ -105,8 +107,21 @@ class RiskManager:
         # Position size = Risk amount / (Entry price * Stop loss %)
         position_value_usd = risk_amount / self.stop_loss_pct
         
-        # Scale by signal confidence
-        position_value_usd *= signal_confidence
+        # CONFIDENCE-BASED SCALING
+        # 70%+ confidence = 100% of calculated size
+        # 60-70% confidence = 70% of size  
+        # 55-60% confidence = 50% of size
+        # Below 55% = don't trade (handled by strategy)
+        if signal_confidence >= 0.70:
+            confidence_multiplier = 1.0
+        elif signal_confidence >= 0.60:
+            confidence_multiplier = 0.7
+        elif signal_confidence >= 0.55:
+            confidence_multiplier = 0.5
+        else:
+            confidence_multiplier = 0.3
+        
+        position_value_usd *= confidence_multiplier
         
         # Apply maximum position size limit
         position_value_usd = min(position_value_usd, self.max_position_size_usd)
@@ -123,7 +138,7 @@ class RiskManager:
         
         logger.info(
             f"Position size calculated: ${position_value_usd:.2f} = {position_size:.4f} @ ${entry_price:.2f} "
-            f"(Risk: ${risk_amount:.2f}, Confidence: {signal_confidence:.2f})"
+            f"(Risk: ${risk_amount:.2f}, Confidence: {signal_confidence:.2f}, Multiplier: {confidence_multiplier:.2f})"
         )
         
         return position_size
@@ -131,28 +146,108 @@ class RiskManager:
     def calculate_stop_loss_take_profit(
         self,
         entry_price: float,
-        side: str
+        side: str,
+        atr_pct: float = None,
+        volatility_regime: str = "normal",
+        market_regime: str = None
     ) -> Tuple[float, float]:
         """
-        Calculate stop-loss and take-profit prices.
+        Calculate regime-aware stop-loss and take-profit levels.
+        
+        Combines volatility-adaptive levels with market regime adjustments:
+        
+        VOLATILITY REGIMES (from 5-year analysis):
+        - Low volatility (ATR < 0.25%): SL=5.0%, TP=2.0%
+        - Normal volatility (0.25% < ATR < 0.50%): SL=5.0%, TP=3.0%
+        - High volatility (ATR > 0.50%): SL=8.0%, TP=4.0%
+        
+        MARKET REGIME ADJUSTMENTS:
+        - BULL: Wider TP, tighter SL (ride trends, cut losses fast)
+        - BEAR: Tighter TP, wider SL (take profits quickly, avoid whipsaws)
+        - SIDEWAYS: Balanced SL/TP (mean reversion expected)
         
         Args:
             entry_price: Entry price
             side: "Buy" or "Sell"
+            atr_pct: ATR as percentage of price (for volatility regime detection)
+            volatility_regime: "low", "normal", or "high" (can override ATR-based detection)
+            market_regime: "bull", "bear", or "sideways" (for regime-specific adjustments)
             
         Returns:
             Tuple of (stop_loss_price, take_profit_price)
         """
+        # Step 1: Determine base SL/TP from volatility
+        if atr_pct is not None:
+            # Determine volatility regime from ATR percentiles
+            if atr_pct < 0.0025:  # Low volatility (< 0.25%)
+                sl_pct = 0.05  # 5%
+                tp_pct = 0.02  # 2%
+                vol_regime = "LOW"
+            elif atr_pct < 0.005:  # Normal volatility (0.25% - 0.50%)
+                sl_pct = 0.05  # 5%
+                tp_pct = 0.03  # 3%
+                vol_regime = "NORMAL"
+            else:  # High volatility (> 0.50%)
+                sl_pct = 0.08  # 8%
+                tp_pct = 0.04  # 4%
+                vol_regime = "HIGH"
+            
+            logger.debug(
+                f"{vol_regime} volatility (ATR {atr_pct:.3%}): "
+                f"Base SL={sl_pct:.1%}/TP={tp_pct:.1%}"
+            )
+        
+        # Fallback to base percentages or regime override
+        elif volatility_regime == "low":
+            sl_pct = 0.05
+            tp_pct = 0.02
+            vol_regime = "LOW"
+        elif volatility_regime == "high":
+            sl_pct = 0.08
+            tp_pct = 0.04
+            vol_regime = "HIGH"
+        else:  # normal or default
+            sl_pct = self.stop_loss_pct
+            tp_pct = self.take_profit_pct
+            vol_regime = "DEFAULT"
+        
+        # Step 2: Apply market regime adjustments (LOCAL variables only - never mutate self)
+        regime_info = vol_regime
+        if market_regime:
+            regime_info = f"{vol_regime}+{market_regime.upper()}"
+            
+            if market_regime == 'bull':
+                # Bull: Widen TP (let winners run), slightly tighter SL
+                tp_pct = tp_pct * 1.5
+                sl_pct = sl_pct * 0.9
+                logger.debug(f"BULL regime adjustment: TP +50%, SL -10%")
+                
+            elif market_regime == 'bear':
+                # Bear: Tighter TP (take profits fast), wider SL (avoid whipsaws)
+                tp_pct = tp_pct * 0.7
+                sl_pct = sl_pct * 1.2
+                logger.debug(f"BEAR regime adjustment: TP -30%, SL +20%")
+                
+            elif market_regime == 'sideways':
+                # Sideways: Balanced, slightly tighter both (mean reversion)
+                tp_pct = tp_pct * 0.85  # -15% tighter TP
+                sl_pct = sl_pct * 0.85  # -15% tighter SL
+                logger.debug(f"SIDEWAYS regime adjustment: Both -15% (mean reversion)")
+        
+        # Calculate actual prices
         if side == "Buy":
             # Long position
-            stop_loss = entry_price * (1 - self.stop_loss_pct)
-            take_profit = entry_price * (1 + self.take_profit_pct)
+            stop_loss = entry_price * (1 - sl_pct)
+            take_profit = entry_price * (1 + tp_pct)
         else:
             # Short position
-            stop_loss = entry_price * (1 + self.stop_loss_pct)
-            take_profit = entry_price * (1 - self.take_profit_pct)
+            stop_loss = entry_price * (1 + sl_pct)
+            take_profit = entry_price * (1 - tp_pct)
         
-        logger.debug(f"SL/TP calculated for {side}: SL=${stop_loss:.2f}, TP=${take_profit:.2f}")
+        logger.info(
+            f"Regime-aware SL/TP ({regime_info}) for {side}: "
+            f"SL=${stop_loss:.2f} ({sl_pct:.2%}), TP=${take_profit:.2f} ({tp_pct:.2%})"
+        )
         return stop_loss, take_profit
     
     def can_open_new_position(
@@ -230,18 +325,21 @@ class RiskManager:
             "take_profit_pct": self.take_profit_pct * 100
         }
     
-    def adjust_for_volatility(self, volatility_multiplier: float):
+    def adjust_for_volatility(self, volatility_multiplier: float) -> Tuple[float, float]:
         """
-        Adjust risk parameters based on market volatility.
+        Return volatility-adjusted SL/TP percentages WITHOUT mutating instance state.
         
         Args:
             volatility_multiplier: Multiplier for risk parameters (e.g., 1.5 for high volatility)
+            
+        Returns:
+            Tuple of (adjusted_sl_pct, adjusted_tp_pct)
         """
-        # Widen stop loss in high volatility
-        self.stop_loss_pct *= volatility_multiplier
-        self.take_profit_pct *= volatility_multiplier
+        adjusted_sl = self.stop_loss_pct * volatility_multiplier
+        adjusted_tp = self.take_profit_pct * volatility_multiplier
         
-        logger.info(f"Risk parameters adjusted for volatility ({volatility_multiplier:.2f}x)")
+        logger.info(f"Volatility adjustment ({volatility_multiplier:.2f}x): SL={adjusted_sl:.4f}, TP={adjusted_tp:.4f}")
+        return adjusted_sl, adjusted_tp
     
     def validate_order_parameters(
         self,

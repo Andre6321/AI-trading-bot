@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 from .client import BybitClient
-from .research.features import build_features
+from .research.features_enhanced import build_enhanced_features
 
 
 logger = logging.getLogger(__name__)
@@ -122,8 +122,8 @@ class DataFetcher:
             return pd.DataFrame()
         
         try:
-            # Calculate all technical indicators
-            df = build_features(self.candle_buffer.copy())
+            # Calculate all technical indicators with enhanced features
+            df = build_enhanced_features(self.candle_buffer.copy())
             
             logger.debug(f"Calculated {len(df.columns)} features")
             return df

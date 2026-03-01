@@ -1,0 +1,501 @@
+==================================================================================================================================
+  V9 MAXIMUM EDGE EXPERIMENT
+  Extended data (2020→2026) + ALL profitability improvements
+==================================================================================================================================
+
+[1] LOADING DATA...
+   Loaded 53,308 rows, 85 columns
+   Date range: 2020-01-25 02:00:00 to 2026-02-24 13:00:00
+🧪 Building alpha features...
+   [1/7] Statistical features (Hurst, autocorrelation, skew, kurtosis, entropy)...
+   [2/7] Skipping funding-rate features (column not present)
+   [3/7] Multi-horizon momentum & acceleration...
+   [4/7] Volume microstructure...
+   [5/7] Regime-transition features...
+   [6/7] Interaction features (volume x momentum, volatility x trend)...
+   [7/7] Lagged return features...
+   [OK] Added 32 alpha features (total columns: 117)
+   After cleanup: 53,140 rows, 117 columns
+   Funding rates merged: 51,861 bars
+   Features: 111
+   Date range: 2020-02-01 02:00:00 to 2026-02-24 13:00:00
+   Total bars: 53,140
+   BTC: $9,442 → $63,091 (+568.2%)
+
+[2] BUILDING TARGET...
+
+   === TARGET: vol-normalized (horizon=8h, winsorize ±3.0σ) ===
+   Vol-norm bounds: [-10.924, 11.051]
+   Vol-norm std: 3.6626
+   Clean samples: 53,120
+
+[3] WALK-FORWARD SPLITS...
+   Main splits: 7 folds
+   Tuning splits: 3 folds
+      Fold 1: train=15,924 | test=5,312 | test dates: 2021-11-27 → 2022-07-07
+      Fold 2: train=21,236 | test=5,312 | test dates: 2022-07-07 → 2023-02-13
+      Fold 3: train=26,548 | test=5,312 | test dates: 2023-02-13 → 2023-09-22
+      Fold 4: train=31,860 | test=5,312 | test dates: 2023-09-22 → 2024-05-01
+      Fold 5: train=37,172 | test=5,312 | test dates: 2024-05-01 → 2024-12-08
+      Fold 6: train=42,484 | test=5,312 | test dates: 2024-12-08 → 2025-07-17
+      Fold 7: train=47,796 | test=5,312 | test dates: 2025-07-17 → 2026-02-24
+
+==================================================================================================================================
+  EXPERIMENT A: V7 BASELINE (RMSE, no weighting)
+==================================================================================================================================
+
+   === BASELINE REGRESSION (v7_baseline_6yr) ===
+      Fold 1: RMSE=3.302867
+      Fold 2: RMSE=3.313728
+      Fold 3: RMSE=3.340184
+      Fold 4: RMSE=3.328921
+      Fold 5: RMSE=3.326676
+      Fold 6: RMSE=3.199143
+      Fold 7: RMSE=3.399285
+      Mean RMSE: 3.315829
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (148s), 7680 valid, 2818 profitable
+
+   ========================================================================================================================
+   V7 BASELINE (6-year data)
+   ========================================================================================================================
+   Total: 7680, Profitable: 2818 (37%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v7_baseline|TP3.0_SL1.5|top5%|short|rebate|fixed|H18|allhours|volscale    156 46.8%   1.52  +11.5%   1.6%    4.76
+   2    v7_baseline|TP3.0_SL1.5|top5%|short|rebate|fixed|H18|allhours|std    156 46.8%   1.52  +11.6%   1.6%    4.68
+   3    v7_baseline|TP3.0_SL1.5|top5%|short|rebate|fixed|H18|allhours|kelly    156 46.8%   1.52  +11.6%   1.6%    4.68
+   4    v7_baseline|TP3.0_SL1.5|top5%|short|rebate|fixed|H18|allhours|kelly_volscale    156 46.8%   1.52  +11.6%   1.6%    4.68
+   5    v7_baseline|TP3.0_SL1.5|top5%|short|zero_fee|fixed|H18|allhours|volscale    156 46.8%   1.51  +11.2%   1.6%    4.66
+   6    v7_baseline|TP3.0_SL1.5|top5%|short|zero_fee|fixed|H18|allhours|std    156 46.8%   1.50  +11.4%   1.6%    4.57
+   7    v7_baseline|TP3.0_SL1.5|top5%|short|zero_fee|fixed|H18|allhours|kelly    156 46.8%   1.50  +11.4%   1.6%    4.57
+   8    v7_baseline|TP3.0_SL1.5|top5%|short|zero_fee|fixed|H18|allhours|kelly_volscale    156 46.8%   1.50  +11.4%   1.6%    4.57
+   9    v7_baseline|TP2.5_SL1.5|top5%|short|rebate|be1.0|H18|allhours|std    182 58.8%   1.50   +8.8%   2.3%    3.90
+   10   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|be1.0|H18|allhours|kelly    182 58.8%   1.50   +8.8%   2.3%    3.90
+   11   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|be1.0|H18|allhours|kelly_volscale    182 58.8%   1.50   +8.8%   2.3%    3.90
+   12   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|be1.0|H18|allhours|volscale    182 58.8%   1.49   +8.5%   2.3%    3.87
+   13   v7_baseline|TP2.5_SL1.5|top5%|short|zero_fee|be1.0|H18|allhours|std    182 55.5%   1.48   +8.5%   2.4%    3.77
+   14   v7_baseline|TP2.5_SL1.5|top5%|short|zero_fee|be1.0|H18|allhours|kelly    182 55.5%   1.48   +8.5%   2.4%    3.77
+   15   v7_baseline|TP2.5_SL1.5|top5%|short|zero_fee|be1.0|H18|allhours|kelly_volscale    182 55.5%   1.48   +8.5%   2.4%    3.77
+   16   v7_baseline|TP2.5_SL1.5|top5%|short|zero_fee|be1.0|H18|allhours|volscale    182 55.5%   1.47   +8.2%   2.4%    3.74
+   17   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|fixed|H18|allhours|volscale    163 49.1%   1.46  +10.3%   2.1%    4.46
+   18   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|fixed|H18|allhours|std    163 49.1%   1.46  +10.4%   2.1%    4.36
+   19   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|fixed|H18|allhours|kelly    163 49.1%   1.46  +10.4%   2.1%    4.36
+   20   v7_baseline|TP2.5_SL1.5|top5%|short|rebate|fixed|H18|allhours|kelly_volscale    163 49.1%   1.46  +10.4%   2.1%    4.36
+
+==================================================================================================================================
+  EXPERIMENT B: V8 DECAY WEIGHTING + HUBER (6-year data)
+==================================================================================================================================
+
+   --- Half-life = 6000h ---
+   Oldest weight: 0.0133, Newest: 6.1496, Ratio: 462.5x
+
+   [Optuna-Huber] Tuning 2 models (40 trials each)...
+   [Optuna-Huber] XGB best RMSE: 3.310872
+   [Optuna-Huber] LGB best RMSE: 3.311007
+
+   === WALK-FORWARD REGRESSION (v8_decay_hl6000) ===
+      Fold 1: XGB=3.297603 | LGB=3.297356
+      Fold 2: XGB=3.314410 | LGB=3.310191
+      Fold 3: XGB=3.336326 | LGB=3.340230
+      Fold 4: XGB=3.334889 | LGB=3.340167
+      Fold 5: XGB=3.326380 | LGB=3.325506
+      Fold 6: XGB=3.199655 | LGB=3.203612
+      Fold 7: XGB=3.403717 | LGB=3.405216
+
+   Mean RMSE: XGB=3.316140 | LGB=3.317468
+   Ensemble weights: XGB=0.500 | LGB=0.500
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (160s), 7680 valid, 4292 profitable
+
+   ========================================================================================================================
+   DECAY WEIGHTING (hl=6000h) + HUBER
+   ========================================================================================================================
+   Total: 7680, Profitable: 4292 (56%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail1.0|H12|allhours|volscale    330 42.7%   1.39   +8.6%   1.6%    3.34
+   2    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail1.0|H12|allhours|std    330 42.7%   1.39   +8.5%   1.6%    3.27
+   3    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail1.0|H12|allhours|kelly    330 42.7%   1.39   +8.5%   1.6%    3.27
+   4    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail1.0|H12|allhours|kelly_volscale    330 42.7%   1.39   +8.5%   1.6%    3.27
+   5    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|volscale    382 44.5%   1.38   +7.6%   1.5%    3.11
+   6    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|volscale    382 44.5%   1.38   +7.6%   1.5%    3.11
+   7    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|std    382 44.5%   1.38   +7.6%   1.5%    3.07
+   8    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly    382 44.5%   1.38   +7.6%   1.5%    3.07
+   9    v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly_volscale    382 44.5%   1.38   +7.6%   1.5%    3.07
+   10   v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|std    382 44.5%   1.38   +7.6%   1.5%    3.07
+   11   v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly    382 44.5%   1.38   +7.6%   1.5%    3.07
+   12   v8_decay6000|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale    382 44.5%   1.38   +7.6%   1.5%    3.07
+   13   v8_decay6000|TP2.0_SL1.5|top5%|short|zero_fee|trail1.0|H12|allhours|volscale    330 42.1%   1.36   +8.0%   1.7%    3.12
+   14   v8_decay6000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H18|allhours|kelly    732 42.9%   1.36  +17.2%   2.8%    2.62
+   15   v8_decay6000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H18|allhours|kelly_volscale    732 42.9%   1.36  +17.2%   2.8%    2.62
+   16   v8_decay6000|TP2.0_SL1.5|top5%|short|zero_fee|trail1.0|H12|allhours|std    330 42.1%   1.35   +7.9%   1.7%    3.05
+   17   v8_decay6000|TP2.0_SL1.5|top5%|short|zero_fee|trail1.0|H12|allhours|kelly    330 42.1%   1.35   +7.9%   1.7%    3.05
+   18   v8_decay6000|TP2.0_SL1.5|top5%|short|zero_fee|trail1.0|H12|allhours|kelly_volscale    330 42.1%   1.35   +7.9%   1.7%    3.05
+   19   v8_decay6000|TP3.0_SL1.5|top5%|short|rebate|trail1.0|H12|allhours|volscale    326 42.9%   1.35   +7.8%   1.7%    2.98
+   20   v8_decay6000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H18|allhours|std    732 42.9%   1.35  +16.7%   2.8%    2.60
+
+   --- Half-life = 8000h ---
+   Oldest weight: 0.0466, Newest: 4.6489, Ratio: 99.7x
+
+   [Optuna-Huber] Tuning 2 models (40 trials each)...
+   [Optuna-Huber] XGB best RMSE: 3.311702
+   [Optuna-Huber] LGB best RMSE: 3.311533
+
+   === WALK-FORWARD REGRESSION (v8_decay_hl8000) ===
+      Fold 1: XGB=3.297786 | LGB=3.298481
+      Fold 2: XGB=3.314004 | LGB=3.314387
+      Fold 3: XGB=3.339382 | LGB=3.339757
+      Fold 4: XGB=3.333286 | LGB=3.334081
+      Fold 5: XGB=3.326137 | LGB=3.329072
+      Fold 6: XGB=3.199271 | LGB=3.203054
+      Fold 7: XGB=3.402777 | LGB=3.405627
+
+   Mean RMSE: XGB=3.316092 | LGB=3.317780
+   Ensemble weights: XGB=0.500 | LGB=0.500
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (153s), 7680 valid, 2643 profitable
+
+   ========================================================================================================================
+   DECAY WEIGHTING (hl=8000h) + HUBER
+   ========================================================================================================================
+   Total: 7680, Profitable: 2643 (34%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|volscale   1566 44.4%   1.27  +27.1%   3.1%    2.22
+   2    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|std   1566 44.4%   1.27  +28.0%   3.2%    2.18
+   3    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   1566 44.4%   1.27  +28.0%   3.2%    2.18
+   4    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1566 44.4%   1.27  +28.0%   3.2%    2.18
+   5    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|volscale   1565 44.4%   1.25  +25.7%   3.1%    2.13
+   6    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|std   1565 44.4%   1.25  +26.4%   3.2%    2.08
+   7    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|kelly   1565 44.4%   1.25  +26.4%   3.2%    2.08
+   8    v8_decay8000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|kelly_volscale   1565 44.4%   1.25  +26.4%   3.2%    2.08
+   9    v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H12|allhours|std   1566 44.3%   1.23  +24.6%   3.2%    1.94
+   10   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H12|allhours|kelly   1566 44.3%   1.23  +24.6%   3.2%    1.94
+   11   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H12|allhours|kelly_volscale   1566 44.3%   1.23  +24.6%   3.2%    1.94
+   12   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H12|allhours|volscale   1566 44.3%   1.23  +23.7%   3.2%    1.98
+   13   v8_decay8000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H12|skip0610|kelly    887 43.5%   1.22  +15.2%   3.9%    1.78
+   14   v8_decay8000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H12|skip0610|kelly_volscale    887 43.5%   1.22  +15.2%   3.9%    1.78
+   15   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H18|allhours|volscale   1565 44.2%   1.22  +22.4%   3.2%    1.88
+   16   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H18|allhours|std   1565 44.2%   1.22  +23.0%   3.2%    1.84
+   17   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H18|allhours|kelly   1565 44.2%   1.22  +23.0%   3.2%    1.84
+   18   v8_decay8000|TP3.0_SL1.5|top20%|short|zero_fee|trail0.75|H18|allhours|kelly_volscale   1565 44.2%   1.22  +23.0%   3.2%    1.84
+   19   v8_decay8000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H18|skip0610|kelly    885 43.4%   1.21  +14.5%   4.0%    1.71
+   20   v8_decay8000|TP3.0_SL1.5|top5%|both|rebate|trail0.75|H18|skip0610|kelly_volscale    885 43.4%   1.21  +14.5%   4.0%    1.71
+
+   --- Half-life = 10000h ---
+   Oldest weight: 0.0951, Newest: 3.7769, Ratio: 39.7x
+
+   [Optuna-Huber] Tuning 2 models (40 trials each)...
+   [Optuna-Huber] XGB best RMSE: 3.311782
+   [Optuna-Huber] LGB best RMSE: 3.310804
+
+   === WALK-FORWARD REGRESSION (v8_decay_hl10000) ===
+      Fold 1: XGB=3.299904 | LGB=3.303317
+      Fold 2: XGB=3.314193 | LGB=3.309704
+      Fold 3: XGB=3.339638 | LGB=3.337114
+      Fold 4: XGB=3.332565 | LGB=3.337081
+      Fold 5: XGB=3.327455 | LGB=3.331420
+      Fold 6: XGB=3.198869 | LGB=3.204180
+      Fold 7: XGB=3.403067 | LGB=3.400073
+
+   Mean RMSE: XGB=3.316527 | LGB=3.317556
+   Ensemble weights: XGB=0.500 | LGB=0.500
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (148s), 7680 valid, 2820 profitable
+
+   ========================================================================================================================
+   DECAY WEIGHTING (hl=10000h) + HUBER
+   ========================================================================================================================
+   Total: 7680, Profitable: 2820 (37%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H12|skip0610|volscale    241 41.5%   1.38   +6.8%   3.0%    3.22
+   2    v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H12|skip0610|std    241 41.5%   1.38   +6.8%   3.0%    3.22
+   3    v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H12|skip0610|kelly    241 41.5%   1.38   +6.8%   3.0%    3.22
+   4    v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H12|skip0610|kelly_volscale    241 41.5%   1.38   +6.8%   3.0%    3.22
+   5    v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H12|skip0610|volscale    241 41.5%   1.35   +6.4%   3.0%    3.03
+   6    v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H12|skip0610|std    241 41.5%   1.35   +6.4%   3.0%    3.03
+   7    v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H12|skip0610|kelly    241 41.5%   1.35   +6.4%   3.0%    3.03
+   8    v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H12|skip0610|kelly_volscale    241 41.5%   1.35   +6.4%   3.0%    3.03
+   9    v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H18|skip0610|volscale    241 41.5%   1.35   +6.4%   3.0%    3.01
+   10   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H18|skip0610|std    241 41.5%   1.35   +6.4%   3.0%    3.01
+   11   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H18|skip0610|kelly    241 41.5%   1.35   +6.4%   3.0%    3.01
+   12   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|trail1.0|H18|skip0610|kelly_volscale    241 41.5%   1.35   +6.4%   3.0%    3.01
+   13   v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H18|skip0610|volscale    241 41.5%   1.32   +5.9%   3.0%    2.82
+   14   v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H18|skip0610|std    241 41.5%   1.32   +5.9%   3.0%    2.82
+   15   v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H18|skip0610|kelly    241 41.5%   1.32   +5.9%   3.0%    2.82
+   16   v8_decay10000|TP2.0_SL1.0|top5%|short|zero_fee|trail1.0|H18|skip0610|kelly_volscale    241 41.5%   1.32   +5.9%   3.0%    2.82
+   17   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|be1.0|H18|skip0610|volscale    209 53.1%   1.32   +6.1%   3.3%    2.85
+   18   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|be1.0|H18|skip0610|std    209 53.1%   1.32   +6.1%   3.3%    2.84
+   19   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|be1.0|H18|skip0610|kelly    209 53.1%   1.32   +6.1%   3.3%    2.84
+   20   v8_decay10000|TP2.0_SL1.0|top5%|short|rebate|be1.0|H18|skip0610|kelly_volscale    209 53.1%   1.32   +6.1%   3.3%    2.84
+
+   --- Half-life = 12000h ---
+   Oldest weight: 0.1496, Newest: 3.2179, Ratio: 21.5x
+
+   [Optuna-Huber] Tuning 2 models (40 trials each)...
+   [Optuna-Huber] XGB best RMSE: 3.311487
+   [Optuna-Huber] LGB best RMSE: 3.310259
+
+   === WALK-FORWARD REGRESSION (v8_decay_hl12000) ===
+      Fold 1: XGB=3.298404 | LGB=3.298905
+      Fold 2: XGB=3.314428 | LGB=3.312452
+      Fold 3: XGB=3.339652 | LGB=3.340743
+      Fold 4: XGB=3.333022 | LGB=3.333401
+      Fold 5: XGB=3.326210 | LGB=3.323979
+      Fold 6: XGB=3.198899 | LGB=3.199382
+      Fold 7: XGB=3.402662 | LGB=3.398613
+
+   Mean RMSE: XGB=3.316183 | LGB=3.315354
+   Ensemble weights: XGB=0.500 | LGB=0.500
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (145s), 7680 valid, 3159 profitable
+
+   ========================================================================================================================
+   DECAY WEIGHTING (hl=12000h) + HUBER
+   ========================================================================================================================
+   Total: 7680, Profitable: 3159 (41%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|std   1357 45.5%   1.29  +23.6%   3.0%    2.43
+   2    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly   1357 45.5%   1.29  +23.6%   3.0%    2.43
+   3    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1357 45.5%   1.29  +23.6%   3.0%    2.43
+   4    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|volscale   1357 45.5%   1.29  +22.5%   2.7%    2.42
+   5    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|std   1356 45.5%   1.28  +22.6%   3.0%    2.36
+   6    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|kelly   1356 45.5%   1.28  +22.6%   3.0%    2.36
+   7    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|kelly_volscale   1356 45.5%   1.28  +22.6%   3.0%    2.36
+   8    v8_decay12000|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|volscale   1356 45.5%   1.28  +21.7%   2.7%    2.36
+   9    v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|std   1354 45.4%   1.28  +22.2%   2.8%    2.29
+   10   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly   1354 45.4%   1.28  +22.2%   2.8%    2.29
+   11   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1354 45.4%   1.28  +22.2%   2.8%    2.29
+   12   v8_decay12000|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|std   1369 45.6%   1.27  +22.0%   2.6%    2.33
+   13   v8_decay12000|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly   1369 45.6%   1.27  +22.0%   2.6%    2.33
+   14   v8_decay12000|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1369 45.6%   1.27  +22.0%   2.6%    2.33
+   15   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|std   1353 45.4%   1.27  +21.6%   2.8%    2.24
+   16   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|kelly   1353 45.4%   1.27  +21.6%   2.8%    2.24
+   17   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|kelly_volscale   1353 45.4%   1.27  +21.6%   2.8%    2.24
+   18   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|volscale   1354 45.4%   1.27  +21.0%   2.6%    2.26
+   19   v8_decay12000|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|volscale   1369 45.6%   1.26  +21.0%   2.5%    2.31
+   20   v8_decay12000|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|skip0610|volscale   1353 45.4%   1.26  +20.5%   2.6%    2.22
+
+   >>> Best half-life: 6000h (v8_decay6000)
+
+==================================================================================================================================
+  EXPERIMENT C: V9 FULL EDGE
+  (decay hl=6000 + funding boost + momentum filter)
+==================================================================================================================================
+
+   [Optuna-Huber] Tuning 2 models (50 trials each)...
+   [Optuna-Huber] XGB best RMSE: 3.310872
+   [Optuna-Huber] LGB best RMSE: 3.310441
+
+   === WALK-FORWARD REGRESSION (v9_full) ===
+      Fold 1: XGB=3.297603 | LGB=3.295045
+      Fold 2: XGB=3.314410 | LGB=3.312688
+      Fold 3: XGB=3.336326 | LGB=3.341368
+      Fold 4: XGB=3.334889 | LGB=3.333950
+      Fold 5: XGB=3.326380 | LGB=3.325560
+      Fold 6: XGB=3.199655 | LGB=3.203721
+      Fold 7: XGB=3.403717 | LGB=3.401224
+
+   Mean RMSE: XGB=3.316140 | LGB=3.316222
+   Ensemble weights: XGB=0.500 | LGB=0.500
+
+   Applying funding rate boost to short signals...
+   Kelly stats (v9_noboost_nomom): WR=38.2%, W/L=1.51, Kelly_f=0.000
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (171s), 7680 valid, 2992 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_noboost_nomom)
+   ========================================================================================================================
+   Total: 7680, Profitable: 2992 (39%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale    372 44.6%   1.36   +5.4%   1.2%    3.07
+   2    v9_noboost_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale    370 44.1%   1.36   +5.5%   1.2%    2.92
+   3    v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly_volscale    372 44.4%   1.36   +5.3%   1.3%    3.04
+   4    v9_noboost_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    340 45.0%   1.36   +5.1%   1.1%    2.91
+   5    v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    342 45.3%   1.35   +4.9%   1.1%    3.01
+   6    v9_noboost_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly_volscale    370 43.8%   1.35   +5.4%   1.3%    2.84
+   7    v9_noboost_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    342 45.3%   1.35   +4.9%   1.1%    2.89
+   8    v9_noboost_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    340 44.7%   1.34   +4.9%   1.2%    2.80
+   9    v9_noboost_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale    372 44.4%   1.34   +5.2%   1.2%    2.83
+   10   v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    342 45.0%   1.34   +4.7%   1.2%    2.88
+   11   v9_noboost_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    342 45.0%   1.34   +4.7%   1.2%    2.78
+   12   v9_noboost_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly_volscale    372 44.1%   1.33   +5.0%   1.3%    2.75
+   13   v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly    342 45.3%   1.32   +4.9%   1.1%    2.81
+   14   v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly    372 44.6%   1.32   +5.2%   1.2%    2.79
+   15   v9_noboost_nomom|TP3.0_SL1.5|top5%|short|zero_fee|trail0.75|H12|allhours|kelly_volscale    370 43.2%   1.32   +5.0%   1.2%    2.63
+   16   v9_noboost_nomom|TP3.0_SL1.5|top5%|short|zero_fee|trail0.75|H12|skip0610|kelly_volscale    340 44.1%   1.32   +4.6%   1.1%    2.62
+   17   v9_noboost_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly    372 44.4%   1.32   +5.1%   1.3%    2.76
+   18   v9_noboost_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly    340 45.0%   1.32   +4.9%   1.4%    2.65
+   19   v9_noboost_nomom|TP2.0_SL1.5|top5%|short|zero_fee|trail0.75|H12|allhours|kelly_volscale    372 43.8%   1.31   +4.7%   1.2%    2.70
+   20   v9_noboost_nomom|TP2.5_SL1.5|top5%|short|zero_fee|trail0.75|H12|skip0610|kelly_volscale    342 44.4%   1.31   +4.4%   1.1%    2.60
+   Momentum filter: 37184 → 24467 signals (12717 filtered out, 34.2%)
+   Kelly stats (v9_noboost_momfilt): WR=36.0%, W/L=1.59, Kelly_f=0.000
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (166s), 7680 valid, 2991 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_noboost_momfilt)
+   ========================================================================================================================
+   Total: 7680, Profitable: 2991 (39%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    438 44.7%   1.54   +8.7%   0.8%    3.94
+   2    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    438 44.7%   1.53   +8.7%   0.8%    3.92
+   3    v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    441 44.9%   1.51   +8.3%   0.8%    3.88
+   4    v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    441 44.9%   1.50   +8.3%   0.8%    3.85
+   5    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly    438 44.7%   1.49   +8.8%   1.0%    3.76
+   6    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|zero_fee|trail0.75|H12|skip0610|kelly_volscale    438 44.7%   1.49   +8.1%   0.9%    3.65
+   7    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|kelly    438 44.7%   1.48   +8.8%   1.0%    3.74
+   8    v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|zero_fee|trail0.75|H18|skip0610|kelly_volscale    438 44.7%   1.48   +8.0%   0.9%    3.63
+   9    v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly    441 44.9%   1.46   +8.4%   1.0%    3.68
+   10   v9_noboost_momfilt|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale    443 44.9%   1.46   +7.5%   0.9%    3.69
+   11   v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|zero_fee|trail0.75|H12|skip0610|kelly_volscale    441 44.9%   1.46   +7.7%   0.9%    3.58
+   12   v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|kelly    441 44.9%   1.46   +8.4%   1.0%    3.65
+   13   v9_noboost_momfilt|TP2.5_SL1.5|top10%|short|zero_fee|trail0.75|H18|skip0610|kelly_volscale    441 44.9%   1.45   +7.6%   0.9%    3.55
+   14   v9_noboost_momfilt|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|kelly_volscale    443 44.9%   1.45   +7.4%   0.9%    3.66
+   15   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|zero_fee|trail0.75|H12|skip0610|kelly    438 44.7%   1.44   +8.1%   1.0%    3.47
+   16   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale    483 43.1%   1.44   +8.1%   1.4%    3.36
+   17   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|allhours|kelly_volscale    483 43.1%   1.44   +8.0%   1.4%    3.34
+   18   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|zero_fee|trail0.75|H18|skip0610|kelly    438 44.7%   1.44   +8.1%   1.0%    3.44
+   19   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|volscale    438 44.7%   1.43   +9.5%   1.7%    3.37
+   20   v9_noboost_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|skip0610|volscale    438 44.7%   1.42   +9.4%   1.7%    3.35
+   Kelly stats (v9_fboost110_nomom): WR=41.3%, W/L=1.49, Kelly_f=0.019
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (190s), 7680 valid, 3631 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_fboost110_nomom)
+   ========================================================================================================================
+   Total: 7680, Profitable: 3631 (47%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_fboost110_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|std   1896 46.0%   1.33  +39.4%   3.5%    2.79
+   2    v9_fboost110_nomom|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|std   1896 46.0%   1.33  +39.4%   3.5%    2.79
+   3    v9_fboost110_nomom|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|std   1896 46.0%   1.33  +39.4%   3.5%    2.79
+   4    v9_fboost110_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly   1896 46.0%   1.33  +39.3%   3.5%    2.79
+   5    v9_fboost110_nomom|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly   1896 46.0%   1.33  +39.3%   3.5%    2.79
+   6    v9_fboost110_nomom|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly   1896 46.0%   1.33  +39.3%   3.5%    2.79
+   7    v9_fboost110_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1896 46.0%   1.33  +37.6%   3.4%    2.78
+   8    v9_fboost110_nomom|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1896 46.0%   1.33  +37.6%   3.4%    2.78
+   9    v9_fboost110_nomom|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1896 46.0%   1.33  +37.6%   3.4%    2.78
+   10   v9_fboost110_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|volscale   1896 46.0%   1.33  +37.7%   3.4%    2.77
+   11   v9_fboost110_nomom|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|volscale   1896 46.0%   1.33  +37.7%   3.4%    2.77
+   12   v9_fboost110_nomom|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|volscale   1896 46.0%   1.33  +37.7%   3.4%    2.77
+   13   v9_fboost110_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|std   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   14   v9_fboost110_nomom|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|std   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   15   v9_fboost110_nomom|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|std   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   16   v9_fboost110_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   17   v9_fboost110_nomom|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   18   v9_fboost110_nomom|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly   1880 45.6%   1.32  +37.1%   3.6%    2.64
+   19   v9_fboost110_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1880 45.6%   1.31  +35.6%   3.5%    2.63
+   20   v9_fboost110_nomom|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   1880 45.6%   1.31  +35.6%   3.5%    2.63
+   Momentum filter: 37184 → 24467 signals (12717 filtered out, 34.2%)
+   Kelly stats (v9_fboost110_momfilt): WR=40.7%, W/L=1.63, Kelly_f=0.044
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (191s), 7680 valid, 4647 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_fboost110_momfilt)
+   ========================================================================================================================
+   Total: 7680, Profitable: 4647 (61%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_fboost110_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|volscale   1473 43.9%   1.47  +38.8%   3.5%    3.66
+   2    v9_fboost110_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|volscale   1473 43.9%   1.47  +38.8%   3.5%    3.66
+   3    v9_fboost110_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|volscale   1473 43.9%   1.47  +38.8%   3.5%    3.66
+   4    v9_fboost110_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|std   1473 43.9%   1.47  +39.3%   3.9%    3.63
+   5    v9_fboost110_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|std   1473 43.9%   1.47  +39.3%   3.9%    3.63
+   6    v9_fboost110_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|std   1473 43.9%   1.47  +39.3%   3.9%    3.63
+   7    v9_fboost110_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   8    v9_fboost110_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   9    v9_fboost110_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   10   v9_fboost110_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   11   v9_fboost110_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   12   v9_fboost110_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1473 43.9%   1.47  +39.3%   3.9%    3.62
+   13   v9_fboost110_momfilt|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   14   v9_fboost110_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   15   v9_fboost110_momfilt|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   16   v9_fboost110_momfilt|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   17   v9_fboost110_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   18   v9_fboost110_momfilt|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   19   v9_fboost110_momfilt|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|std   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   20   v9_fboost110_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|std   1484 44.2%   1.45  +38.3%   4.1%    3.54
+   Kelly stats (v9_fboost114_nomom): WR=41.2%, W/L=1.46, Kelly_f=0.010
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (199s), 7680 valid, 4004 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_fboost114_nomom)
+   ========================================================================================================================
+   Total: 7680, Profitable: 4004 (52%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_fboost114_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale   2179 44.5%   1.34  +43.0%   3.6%    2.78
+   2    v9_fboost114_nomom|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale   2179 44.5%   1.34  +43.0%   3.6%    2.78
+   3    v9_fboost114_nomom|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly_volscale   2179 44.5%   1.34  +43.0%   3.6%    2.78
+   4    v9_fboost114_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|kelly_volscale   2174 44.3%   1.33  +41.9%   3.6%    2.73
+   5    v9_fboost114_nomom|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|allhours|kelly_volscale   2174 44.3%   1.33  +41.9%   3.6%    2.73
+   6    v9_fboost114_nomom|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|kelly_volscale   2174 44.3%   1.33  +41.9%   3.6%    2.73
+   7    v9_fboost114_nomom|TP2.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2055 45.8%   1.32  +38.0%   2.7%    2.77
+   8    v9_fboost114_nomom|TP2.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2055 45.8%   1.32  +38.0%   2.7%    2.77
+   9    v9_fboost114_nomom|TP2.0_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2055 45.8%   1.32  +38.0%   2.7%    2.77
+   10   v9_fboost114_nomom|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2040 45.4%   1.32  +37.4%   2.8%    2.68
+   11   v9_fboost114_nomom|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2040 45.4%   1.32  +37.4%   2.8%    2.68
+   12   v9_fboost114_nomom|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2040 45.4%   1.32  +37.4%   2.8%    2.68
+   13   v9_fboost114_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|volscale   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   14   v9_fboost114_nomom|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|volscale   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   15   v9_fboost114_nomom|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|volscale   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   16   v9_fboost114_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   17   v9_fboost114_nomom|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   18   v9_fboost114_nomom|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   2179 44.5%   1.31  +44.0%   4.3%    2.62
+   19   v9_fboost114_nomom|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2029 45.0%   1.31  +36.3%   2.8%    2.61
+   20   v9_fboost114_nomom|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|skip0610|kelly_volscale   2029 45.0%   1.31  +36.3%   2.8%    2.61
+   Momentum filter: 37184 → 24467 signals (12717 filtered out, 34.2%)
+   Kelly stats (v9_fboost114_momfilt): WR=41.2%, W/L=1.62, Kelly_f=0.049
+      Sweeping 7680 strategy combinations...
+      Done: 7680 configs (193s), 7680 valid, 4797 profitable
+
+   ========================================================================================================================
+   V9 FULL EDGE (v9_fboost114_momfilt)
+   ========================================================================================================================
+   Total: 7680, Profitable: 4797 (62%)
+
+   #    Label                                                             Trades     WR     PF    Ret%    DD%  Sharpe
+   --------------------------------------------------------------------------------------------------------------
+   1    v9_fboost114_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|volscale   1582 44.3%   1.48  +44.2%   3.5%    3.73
+   2    v9_fboost114_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|volscale   1582 44.3%   1.48  +44.2%   3.5%    3.73
+   3    v9_fboost114_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|volscale   1582 44.3%   1.48  +44.2%   3.5%    3.73
+   4    v9_fboost114_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|std   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   5    v9_fboost114_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|std   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   6    v9_fboost114_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|std   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   7    v9_fboost114_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   8    v9_fboost114_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   9    v9_fboost114_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   10   v9_fboost114_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   11   v9_fboost114_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   12   v9_fboost114_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1582 44.3%   1.48  +44.6%   3.9%    3.69
+   13   v9_fboost114_momfilt|TP3.0_SL1.5|top5%|short|rebate|trail0.75|H18|allhours|volscale   1577 44.1%   1.47  +43.1%   3.5%    3.67
+   14   v9_fboost114_momfilt|TP3.0_SL1.5|top10%|short|rebate|trail0.75|H18|allhours|volscale   1577 44.1%   1.47  +43.1%   3.5%    3.67
+   15   v9_fboost114_momfilt|TP3.0_SL1.5|top20%|short|rebate|trail0.75|H18|allhours|volscale   1577 44.1%   1.47  +43.1%   3.5%    3.67
+   16   v9_fboost114_momfilt|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly   1594 44.7%   1.47  +44.0%   4.1%    3.65
+   17   v9_fboost114_momfilt|TP2.5_SL1.5|top5%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1594 44.7%   1.47  +44.0%   4.1%    3.65
+   18   v9_fboost114_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly   1594 44.7%   1.47  +44.0%   4.1%    3.65
+   19   v9_fboost114_momfilt|TP2.5_SL1.5|top10%|short|rebate|trail0.75|H12|allhours|kelly_volscale   1594 44.7%   1.47  +44.0%   4.1%    3.65
+   20   v9_fboost114_momfilt|TP2.5_SL1.5|top20%|short|rebate|trail0.75|H12|allhours|kelly   1594 44.7%   1.47  +44.0%   4.1%    3.65
+   Kelly stats (v9_fboost120_nomom): WR=41.5%, W/L=1.46, Kelly_f=0.016
+      Sweeping 7680 strategy combinations...

@@ -1,0 +1,19 @@
+{
+  "regime": "SIDEWAYS",
+  "train_samples": 18509,
+  "val_samples": 3966,
+  "test_samples": 3967,
+  "num_features": 108,
+  "xgb_val_auc": 0.7650393208130709,
+  "lgb_val_auc": 0.7546449935906565,
+  "ensemble_val_auc": 0.7663929130974423,
+  "test_roc_auc": 0.7713379494357315,
+  "test_accuracy": 0.7123771111671288,
+  "improvements": [
+    "Advanced feature engineering",
+    "Regime-specific hyperparameters",
+    "Stacked ensemble",
+    "Probability calibration",
+    "Balanced class weights"
+  ]
+}
